@@ -2,14 +2,13 @@
 
 package:
   name: vtk-cdat
-  # version: {{ environ['GIT_DESCRIBE_TAG'][1:] ~ "." ~ environ['GIT_DESCRIBE_NUMBER']}}.@VERSION@
-  version: 8.2.0rc2.8.1
+  version: {{ environ['GIT_DESCRIBE_TAG'][1:] ~ "." ~ environ['GIT_DESCRIBE_NUMBER']}}.@VERSION@
 
 source:
   # git_branch: master
   # git_url: https://gitlab.kitware.com/vtk/vtk.git
-  git_branch: context2d-contour-label-improvements
-  git_url: https://github.com/CDAT/VTK.git
+  git_branch: python-optional-link-default-off
+  git_url: https://gitlab.kitware.com/scott.wittenburg/VTK.git
 
 build:
   number: {{ build_number }}

@@ -6,9 +6,23 @@ cd build
 BUILD_CONFIG=Release
 OSNAME=`uname`
 
+# Use bash "Remove Largest Suffix Pattern" to get rid of all but major version number
+PYTHON_MAJOR_VERSION=${PY_VER%%.*}
+
+# These will help cmake find the right python
+PYTHON_H_FILE=$(find $PREFIX -name Python.h -type f)
+PYTHON_INCLUDE_DIR=$(dirname ${PYTHON_H_FILE})
+if [ ${OSNAME} == Darwin ]; then
+    PYTHON_LIBRARY=$(find $PREFIX -regex '.*libpython.*\.dylib$')
+elif [ ${OSNAME} == Linux ]; then
+    PYTHON_LIBRARY=$(find $PREFIX -regex '.*libpython.*\.so$')
+fi
+PYTHON_INCLUDE_PARAMETER_NAME="Python${PYTHON_MAJOR_VERSION}_INCLUDE_DIR"
+PYTHON_LIBRARY_PARAMETER_NAME="Python${PYTHON_MAJOR_VERSION}_LIBRARY_RELEASE"
+
 if [ -f "$PREFIX/lib/libOSMesa32${SHLIB_EXT}" ]; then
     VTK_ARGS="${VTK_ARGS} \
-        -DVTK_USE_OFFSCREEN:BOOL=ON \
+        -DVTK_DEFAULT_RENDER_WINDOW_OFFSCREEN:BOOL=ON \
         -DVTK_OPENGL_HAS_OSMESA:BOOL=ON \
         -DOSMESA_INCLUDE_DIR:PATH=${PREFIX}/include \
         -DOSMESA_LIBRARY:FILEPATH=${PREFIX}/lib/libOSMesa32${SHLIB_EXT}"
@@ -19,20 +33,18 @@ if [ -f "$PREFIX/lib/libOSMesa32${SHLIB_EXT}" ]; then
             -DVTK_USE_X:BOOL=OFF"
     elif [ ${OSNAME} == Darwin ]; then
         VTK_ARGS="${VTK_ARGS} \
-            -DVTK_USE_CARBON:BOOL=OFF \
             -DVTK_USE_COCOA:BOOL=OFF \
             -DCMAKE_OSX_SYSROOT:PATH=${CONDA_BUILD_SYSROOT}"
     fi
 else
     VTK_ARGS="${VTK_ARGS} \
-        -DVTK_USE_OFFSCREEN:BOOL=OFF \
+        -DVTK_DEFAULT_RENDER_WINDOW_OFFSCREEN:BOOL=OFF \
         -DVTK_OPENGL_HAS_OSMESA:BOOL=OFF"
     if [ ${OSNAME} == Linux ]; then
         VTK_ARGS="${VTK_ARGS} \
             -DVTK_USE_X:BOOL=ON"
     elif [ ${OSNAME} == Darwin ]; then
         VTK_ARGS="${VTK_ARGS} \
-            -DVTK_USE_CARBON:BOOL=OFF \
             -DVTK_USE_COCOA:BOOL=ON \
             -DCMAKE_OSX_SYSROOT:PATH=${CONDA_BUILD_SYSROOT}"
     fi
@@ -46,32 +58,30 @@ cmake .. -G "Ninja" \
     -DCMAKE_INSTALL_PREFIX:PATH="${PREFIX}" \
     -DCMAKE_INSTALL_LIBDIR:PATH="lib" \
     -DCMAKE_INSTALL_RPATH:PATH="${PREFIX}/lib" \
-    -DBUILD_DOCUMENTATION:BOOL=OFF \
-    -DBUILD_TESTING:BOOL=OFF \
-    -DBUILD_EXAMPLES:BOOL=OFF \
+    -DVTK_BUILD_DOCUMENTATION:BOOL=OFF \
+    -DVTK_BUILD_TESTING:STRING=OFF \
+    -DVTK_BUILD_EXAMPLES:BOOL=OFF \
     -DBUILD_SHARED_LIBS:BOOL=ON \
-    -DVTK_WRAP_PYTHON:BOOL=ON \
-    -DModule_vtkPythonInterpreter:BOOL=OFF \
-    -DVTK_PYTHON_VERSION:STRING="${PY_VER}" \
+    -DVTK_LEGACY_SILENT:BOOL=OFF \
     -DVTK_HAS_FEENABLEEXCEPT:BOOL=OFF \
-    -DModule_vtkRenderingMatplotlib=ON \
-    -DVTK_Group_Web:BOOL=ON \
-    -DVTK_LEGACY_SILENT:BOOL=ON \
-    -DModule_vtkIOFFMPEG:BOOL=ON \
-    -DModule_vtkViewsCore:BOOL=ON \
-    -DModule_vtkViewsGeovis:BOOL=ON \
+    -DVTK_WRAP_PYTHON:BOOL=ON \
+    -DVTK_PYTHON_VERSION:STRING="${PYTHON_MAJOR_VERSION}" \
+    -DPYTHON_EXECUTABLE:FILEPATH="${PREFIX}/bin/python" \
+    "-D${PYTHON_INCLUDE_PARAMETER_NAME}:PATH=${PYTHON_INCLUDE_DIR}" \
+    "-D${PYTHON_LIBRARY_PARAMETER_NAME}:FILEPATH=${PYTHON_LIBRARY}" \
+    -DVTK_PYTHON_OPTIONAL_LINK:BOOL=ON \
+    -DVTK_MODULE_ENABLE_VTK_PythonInterpreter:STRING=NO \
+    -DVTK_MODULE_ENABLE_VTK_RenderingFreeType:STRING=YES \
+    -DVTK_MODULE_ENABLE_VTK_RenderingMatplotlib:STRING=YES \
+    -DVTK_MODULE_ENABLE_VTK_IOFFMPEG:STRING=YES \
+    -DVTK_MODULE_ENABLE_VTK_ViewsCore:STRING=YES \
+    -DVTK_MODULE_ENABLE_VTK_ViewsContext2D:STRING=YES \
+    -DVTK_MODULE_ENABLE_VTK_PythonContext2D:STRING=YES \
+    -DVTK_MODULE_ENABLE_VTK_RenderingContext2D:STRING=YES \
+    -DVTK_MODULE_ENABLE_VTK_RenderingContextOpenGL2:STRING=YES \
+    -DVTK_MODULE_ENABLE_VTK_RenderingCore:STRING=YES \
+    -DVTK_MODULE_ENABLE_VTK_RenderingOpenGL2:STRING=YES \
     ${VTK_ARGS}
 
 # compile and install
 ninja install
-
-# patch the dynamic load libraries
-if [ ${PY3K} == 1 ] && [ ${OSNAME} == Darwin ]; then
-    echo 'Patching dynamic lookup libraries'
-    mv ${PREFIX}/lib/libvtkRenderingMatplotlib-8.2.1.dylib ${PREFIX}/lib/libvtkRenderingMatplotlib-8.2.1.dylib_orig
-    mv ${PREFIX}/lib/libvtkRenderingMatplotlibPython37D-8.2.1.dylib ${PREFIX}/lib/libvtkRenderingMatplotlibPython37D-8.2.1.dylib_orig
-    mv ${PREFIX}/lib/libvtkPythonInterpreter-8.2.1.dylib ${PREFIX}/lib/libvtkPythonInterpreter-8.2.1.dylib_orig
-    cp ../libvtkRenderingMatplotlib-8.2.1.dylib ${PREFIX}/lib/libvtkRenderingMatplotlib-8.2.1.dylib
-    cp ../libvtkRenderingMatplotlibPython36D-8.2.1.dylib ${PREFIX}/lib/libvtkRenderingMatplotlibPython37D-8.2.1.dylib
-    cp ../libvtkPythonInterpreter-8.2.1.dylib ${PREFIX}/lib/libvtkPythonInterpreter-8.2.1.dylib
-fi
