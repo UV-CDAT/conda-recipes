@@ -25,7 +25,7 @@ requirements:
     - udunits2
     - hdf5
     - libnetcdf
-    - numpy
+    - numpy >1.11
     - setuptools
     - cdms2
   run:
