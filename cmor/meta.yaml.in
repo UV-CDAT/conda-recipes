@@ -1,6 +1,6 @@
 package:
     name: cmor
-    version: @VERSION@.npy{{ numpy }}
+    version: @VERSION@
 
 source:
     git_rev: @UVCDAT_BRANCH@

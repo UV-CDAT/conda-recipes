@@ -2,7 +2,5 @@ python:
     - 2.7
     - 3.6
     - 3.7
-numpy:
-    - 1.16
 fortran_compiler_version:   # [osx]
     - 4.8.5                 # [osx]
