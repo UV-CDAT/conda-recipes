@@ -1,6 +1,6 @@
 package:
     name: cmor
-    version: @VERSION@
+    version: @VERSION@.numpy
 
 source:
     git_rev: @UVCDAT_BRANCH@
