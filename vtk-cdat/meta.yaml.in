@@ -5,11 +5,9 @@ package:
   version: {{ environ['GIT_DESCRIBE_TAG'][1:] ~ "." ~ environ['GIT_DESCRIBE_NUMBER']}}.@VERSION@
 
 source:
-  patches:
-    - enable-python-optional-link.patch
   # git_branch: master
   # A revision from master. When we want to user a newer VTK we change this
-  git_rev: 5e9164e3da773da8a90e5b97736a0355ef456079
+  git_rev: 3694ed69408e4fb135a0cccd8074d6277a655463
   git_url: https://gitlab.kitware.com/vtk/vtk.git
 
 build:
