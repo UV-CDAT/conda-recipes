@@ -7,7 +7,7 @@ export CDTIME_VERSION=3.1.2
 export GENUTIL_VERSION=8.2
 export LIBNETCDF_VERSION=4.6.2
 export VERSION_EXTRA=""
-export BUILD=1
+export BUILD=2
 export OPERATOR="=="
 export CDMS_OPERATOR="=="
 export PY3_VERSION="<"
