@@ -17,6 +17,8 @@ echo "ACTIVATE COMMAND: ${ACTIVATE_COMMAND}"
 
 ${ACTIVATE_COMMAND} deactivate
 ${ACTIVATE_COMMAND} activate base
+conda config --add channels conda-forge
+conda config --set channel_priority strict
 
 #source $CONDA_BASE/etc/profile.d/conda.sh
 
@@ -40,7 +42,7 @@ for PYVER in 2.7 3.6 3.7
             fi
             echo "Doing version $PYVER with mesalib set to $MESA"
             if [ ${CREATE} == "y" ]; then
-                conda create -y -n cdat-${RELEASE}${MESA_NAME}_py$PYVER ${PREPEND_CHANNEL} -c cdat/label/${RELEASE} -c conda-forge ${APPEND_CHANNEL} cdat python=$PYVER ${MESA_PKG}
+                conda create -y -n cdat-${RELEASE}${MESA_NAME}_py$PYVER ${PREPEND_CHANNEL} -c conda-forge -c cdat/label/${RELEASE} ${APPEND_CHANNEL} cdat python=$PYVER ${MESA_PKG}
             fi
             ${ACTIVATE_COMMAND} activate cdat-${RELEASE}${MESA_NAME}_py$PYVER
             echo $(conda list vtk)
