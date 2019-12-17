@@ -250,12 +250,16 @@ def rerender(dir):
 def do_build(dir, py_version):
     ret = SUCCESS
     variant_files_dir = os.path.join(dir, ".ci_support")
-    if sys.platform == 'darwin':
-         variant_files = glob.glob("{d}/.ci_support/osx*{v}.yaml".format(d=dir, v=py_version))
+    if py_version == "noarch":
+        variant_file = os.path.join(variant_files_dir, "linux_.yaml")
     else:
-         variant_files = glob.glob("{d}/.ci_support/linux*{v}.yaml".format(d=dir, v=py_version))
+        if sys.platform == 'darwin':
+            variant_files = glob.glob("{d}/.ci_support/osx*{v}.yaml".format(d=dir, v=py_version))
+        else:
+            variant_files = glob.glob("{d}/.ci_support/linux*{v}.yaml".format(d=dir, v=py_version))
+        variant_file = variant_files[0]
 
-    cmd = "conda build -m {v} recipe/".format(v=variant_files[0])
+    cmd = "conda build -m {v} recipe/".format(v=variant_file)
     ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
     return ret
 
