@@ -242,6 +242,10 @@ def prepare_recipe_in_local_repo(branch, build, version, repo_dir):
     with open(recipe_file, "w") as f:
         f.write(s)
 
+    cmd = "cat {f}".format(f=recipe_file)
+    print("CMD: {c}".format(c=cmd))
+    os.system(cmd)
+
     return SUCCESS
 
 def rerender(dir):
