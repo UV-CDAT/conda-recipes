@@ -27,12 +27,15 @@ today = "%s.%.2i.%.2i.%.2i.%.2i.%.2i.%s" % (last_stable, l.tm_year, l.tm_mon, l.
 cwd = os.getcwd()
 
 #
-# This script can be used to build conda-forge packages or non conda-forge packages 
-# (i.e. those packages that goes to cdat/label/<LABEL>)
-# This script should be run in the project repository top directory.
+# This script is to be run under a CDAT project repo directory.
+#
+# This script can be used to build CDAT packages that go to cdat channel
+# (ex: cdat/label/nightly) and CDAT packages that go to cdat channel
+# but eventually will get uploaded to conda-forge (i.e. packages that have 
+# conda-forge feedstock repo.
 #
 # For conda-forge packages:
-# + clone the fork (fork_repo) of the feedstock to <workdir>/<pkg_name>-feedstock directory.
+# + clone the feedstock to <workdir>/<pkg_name>-feedstock directory.
 # + clone the project repo to <workdir>/<repo_name> directory.
 # + if project repo has recipe/meta.yaml.in, will build using the project repo recipe.
 #   This should be the case when the project branch is modifying the recipe
@@ -42,7 +45,11 @@ cwd = os.getcwd()
 #
 # For non conda-forge packages (packages that are uploaded to cdat/label/nightly
 # or cdat/label/<release>:
-# 
+# + clone the project repo to <workdir>/<repo_name> directory.
+#
+# The need to reclone the project repo is because rerendering will
+# overwrite .circleci/config.yml, and this is problematic if we are running
+# this script in CircleCI.
 #
 
 parser = argparse.ArgumentParser(
@@ -343,8 +350,6 @@ def rerender_and_build_in_local_repo(repo_dir):
 
 #
 # main
-# Note that when we rerender in a repo, it overwrites .circleci/config.yml in the repo,
-# therefore I reclone the repo to be under workdir.
 #
 
 is_conda_forge_pkg = check_if_conda_forge_pkg(pkg_name)
