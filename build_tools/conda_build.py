@@ -359,9 +359,9 @@ if args.do_rerender:
     if status != SUCCESS:
         sys.exit(status)
 
-    ret, repo_dir = clone_repo(repo_name, branch, workdir)
-    if ret != SUCCESS:
-        sys.exit(ret)
+ret, repo_dir = clone_repo(repo_name, branch, workdir)
+if ret != SUCCESS:
+    sys.exit(ret)
 
 if is_conda_forge_pkg:
     if args.do_rerender:
