@@ -366,7 +366,7 @@ if is_conda_forge_pkg:
 
 else:
     # non conda-forge package (does not have feedstock)
-
+    repo_dir = os.path.join(workdir, pkg_name)
     print("Building non conda-forge package")
     print("...branch: {b}".format(b=branch))
     print("...build: {b}".format(b=build))
