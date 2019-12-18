@@ -259,6 +259,10 @@ def rerender(dir):
     return ret
 
 def do_build(dir, py_version):
+    print("XXX XXX do_build")
+    cmd = "cat {d}/recipe/meta.yaml".format(d=dir)
+    os.system(cmd)
+
     ret = SUCCESS
     variant_files_dir = os.path.join(dir, ".ci_support")
     if py_version == "noarch":
@@ -270,7 +274,7 @@ def do_build(dir, py_version):
             variant_files = glob.glob("{d}/.ci_support/linux*{v}.yaml".format(d=dir, v=py_version))
         variant_file = variant_files[0]
 
-    cmd = "conda build -m {v} {d}/recipe/".format(v=variant_file, d=dir)
+    cmd = "conda build -m {v} recipe/".format(v=variant_file)
     ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
     return ret
 
@@ -332,24 +336,6 @@ def rerender_in_local_repo(repo_dir):
 def build_in_local_repo(repo_dir, py_version):
 
     ret = do_build(repo_dir, py_version)
-    return ret
-
-def rerender_and_build_in_local_repo(repo_dir):
-    dir = os.getcwd()
-
-    # since this is not a feedstock repo, we need conda-forge.yml for rerender
-    conda_forge_yml = os.path.join(repo_dir, "conda-forge.yml")
-    fh = open(conda_forge_yml, "w")
-    fh.write("recipe_dir: recipe\n")
-    fh.close()
-
-    ret = rerender(repo_dir)
-    if ret != SUCCESS:
-        return ret
-
-    ret = update_variant_files(repo_dir)
-
-    ret = do_build(repo_dir)
     return ret
 
 #
