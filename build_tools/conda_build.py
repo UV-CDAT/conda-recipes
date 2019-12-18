@@ -259,10 +259,6 @@ def rerender(dir):
     return ret
 
 def do_build(dir, py_version):
-    print("XXX XXX do_build")
-    cmd = "cat {d}/recipe/meta.yaml".format(d=dir)
-    os.system(cmd)
-
     ret = SUCCESS
     variant_files_dir = os.path.join(dir, ".ci_support")
     if py_version == "noarch":
@@ -349,9 +345,9 @@ if args.do_rerender:
     if status != SUCCESS:
         sys.exit(status)
 
-ret, repo_dir = clone_repo(repo_name, branch, workdir)
-if ret != SUCCESS:
-    sys.exit(ret)
+    ret, repo_dir = clone_repo(repo_name, branch, workdir)
+    if ret != SUCCESS:
+        sys.exit(ret)
 
 if is_conda_forge_pkg:
     if args.do_rerender:
