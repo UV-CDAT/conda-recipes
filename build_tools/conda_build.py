@@ -265,9 +265,9 @@ def do_build(dir, py_version):
         variant_file = os.path.join(variant_files_dir, "linux_.yaml")
     else:
         if sys.platform == 'darwin':
-            variant_files = glob.glob("{d}/.ci_support/osx*{v}.yaml".format(d=dir, v=py_version))
+            variant_files = glob.glob("{d}/.ci_support/osx*{v}*.yaml".format(d=dir, v=py_version))
         else:
-            variant_files = glob.glob("{d}/.ci_support/linux*{v}.yaml".format(d=dir, v=py_version))
+            variant_files = glob.glob("{d}/.ci_support/linux*{v}*.yaml".format(d=dir, v=py_version))
         variant_file = variant_files[0]
 
     cmd = "conda build -m {v} recipe/".format(v=variant_file)
