@@ -15,7 +15,7 @@ from Utils import SUCCESS, FAILURE
 p = subprocess.Popen(["git", "rev-parse", "--short", "HEAD"], stdout=subprocess.PIPE)
 git_rev_parse = p.stdout.read().decode('utf-8')
 git_rev = "g{0}".format(git_rev_parse).strip()
-
+print("XXX XXX XXX git_rev: {g}".format(g=git_rev))
 if "VERSION" in os.environ.keys():
     last_stable=os.environ['VERSION']
 else:
