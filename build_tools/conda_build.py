@@ -94,6 +94,8 @@ else:
     # we are building for nightly
     version = today2
 
+print("XXX XXX XXX version: {v}".format(v=version))
+
 # github organization of projects
 organization = "CDAT"
 
@@ -162,7 +164,7 @@ def clone_repo(repo_name, branch, workdir):
 
     return ret, repo_dir
 
-def prepare_recipe_in_local_feedstock_repo(pkg_name, repo_name, branch, repo_dir, workdir):
+def prepare_recipe_in_local_feedstock_repo(pkg_name, repo_name, branch, pkg_version, repo_dir, workdir):
     repo_url = "https://github.com/{o}/{r}.git\n\n".format(o=organization,r=repo_name)
 
     pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
@@ -193,7 +195,7 @@ def prepare_recipe_in_local_feedstock_repo(pkg_name, repo_name, branch, repo_dir
 
     output_fh.write("package:\n")
     output_fh.write("  name: {n}\n".format(n=pkg_name))
-    output_fh.write("  version: {v}\n\n".format(v=version))
+    output_fh.write("  version: {v}\n\n".format(v=pkg_version))
 
     output_fh.write("source:\n")
     output_fh.write("  git_rev: {b}\n".format(b=branch))
@@ -361,7 +363,7 @@ if is_conda_forge_pkg:
         if status != SUCCESS:
             sys.exit(status)
 
-        status = prepare_recipe_in_local_feedstock_repo(pkg_name, repo_name, branch, repo_dir, workdir)
+        status = prepare_recipe_in_local_feedstock_repo(pkg_name, repo_name, branch, version, repo_dir, workdir)
         if status != SUCCESS:
             sys.exit(status)
 
