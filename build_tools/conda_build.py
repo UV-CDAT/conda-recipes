@@ -111,7 +111,7 @@ def prep_conda_env():
 
     pkgs = "conda-build anaconda-client conda-smithy conda-verify conda-forge-pinning conda-forge-build-setup conda-forge-ci-setup"
     cmds = [
-        #"conda update -y -q conda",
+        "conda update -y -q conda",
         "conda config --add channels conda-forge --force",
         "conda config --set channel_priority strict",
         "conda install -n base -c conda-forge {p}".format(p=pkgs),
