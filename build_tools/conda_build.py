@@ -58,6 +58,8 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument("-p", "--package_name",
                     help="Package name to build")
+parser.add_argument("-o", "--github_organization_name",
+                    help="github organization name", default="CDAT")
 parser.add_argument("-r", "--repo_name",
                     help="repo name to build")
 parser.add_argument("-b", "--branch", default='master', help="branch to build")
@@ -97,7 +99,7 @@ else:
 print("XXX XXX XXX version: {v}".format(v=version))
 
 # github organization of projects
-organization = "CDAT"
+organization = args.github_organization_name
 
 # for calling run_cmds
 join_stderr = True
