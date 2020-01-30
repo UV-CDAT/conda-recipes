@@ -115,7 +115,7 @@ def clone_repo(organization, repo_name, branch, workdir):
 
     return ret, repo_dir
 
-def prepare_recipe_in_local_feedstock_repo(pkg_name, repo_name, branch, pkg_version, repo_dir, workdir):
+def prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, branch, pkg_version, repo_dir, workdir):
     repo_url = "https://github.com/{o}/{r}.git\n\n".format(o=organization,r=repo_name)
 
     pkg_feedstock = "{p}-feedstock".format(p=pkg_name)

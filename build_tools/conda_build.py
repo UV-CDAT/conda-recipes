@@ -132,7 +132,7 @@ if is_conda_forge_pkg:
         if status != SUCCESS:
             sys.exit(status)
 
-        status = prepare_recipe_in_local_feedstock_repo(pkg_name, repo_name, branch, version, repo_dir, workdir)
+        status = prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, branch, version, repo_dir, workdir)
         if status != SUCCESS:
             sys.exit(status)
 
