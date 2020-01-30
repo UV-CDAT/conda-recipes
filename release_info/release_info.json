@@ -1,0 +1,29 @@
+{
+  "8.2.1": {
+  	   "cdat": {
+	 	   "dv3d": {
+     	     	 	   "version": "8.2", 
+	       		   "build": "1",
+			   "type": "noarch"
+	       		   },
+     	    	   "vcs": {
+     	   	 	  "version": "8.2", 
+	    		  "build": "3",
+			   "type": "noarch"
+	    		  },
+     	 	   "wk": {
+     	    	       	 "version": "8.2", 
+	    	       	 "build": "1",
+            		 "type": "noarch"
+	    	       	 }  
+   		   },
+           "conda-forge": {
+     		   	  "cdtime": {
+	     	   	  	    "version": "3.1.3", 
+	     	         	    "build": "0",
+                                    "type": "arch"
+	     		 	    }
+		          }
+
+   }
+}
