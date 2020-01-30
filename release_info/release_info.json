@@ -15,6 +15,11 @@
      	    	       	 "version": "8.2", 
 	    	       	 "build": "1",
             		 "type": "noarch"
+	    	       	 },
+     	 	   "vcsaddons": {
+     	    	       	 "version": "8.2", 
+	    	       	 "build": "2",
+            		 "type": "arch"
 	    	       	 }  
    		   },
            "conda-forge": {
