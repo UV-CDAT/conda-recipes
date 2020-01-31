@@ -63,9 +63,10 @@ def prep_conda_env(to_do_conda_clean=False):
     pkgs = "conda-build anaconda-client conda-smithy conda-verify conda-forge-pinning conda-forge-build-setup conda-forge-ci-setup"
     cmds = [
         #"conda update -y -q conda",
+        "conda config --set always_yes yes",
         "conda config --add channels conda-forge --force",
         "conda config --set channel_priority strict",
-        "conda install -y -n base -c conda-forge {p}".format(p=pkgs),
+        "conda install -n base -c conda-forge {p}".format(p=pkgs),
         "conda config --set anaconda_upload no"
         ]
     ret = run_cmds(cmds)
