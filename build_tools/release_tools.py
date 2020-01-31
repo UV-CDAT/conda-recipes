@@ -112,7 +112,7 @@ def clone_repo(organization, repo_name, branch, workdir):
         cmd = "git clone {u}".format(u=repo_url)
     else:
         cmd = "git clone -b {b} {u}".format(b=branch, u=repo_url)
-    print("DEBUG...clone_repo(), CMD: {c}".format(c=cmd))
+
     ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, workdir)
 
     return ret, repo_dir
@@ -207,13 +207,6 @@ def rerender(dir):
     # pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
     # repo_dir = "{w}/{p}".format(w=workdir, p=pkg_feedstock)
 
-    # DEBUG
-    cmd = "ls -l"
-    ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
-
-    cmd = "pwd"
-    ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
-
     cmd = "conda smithy rerender"
     ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
     if ret != SUCCESS:
@@ -266,7 +259,6 @@ def rerender_in_local_repo(repo_dir):
     fh.write("recipe_dir: recipe\n")
     fh.close()
 
-    print("DEBUG...rerender_in_local_repo, repo_dir: {d}".format(d=repo_dir))
     ret = rerender(repo_dir)
     return ret
 
