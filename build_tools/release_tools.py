@@ -65,7 +65,7 @@ def prep_conda_env(to_do_conda_clean=False):
         #"conda update -y -q conda",
         "conda config --add channels conda-forge --force",
         "conda config --set channel_priority strict",
-        "conda install -n base -c conda-forge {p}".format(p=pkgs),
+        "conda install -y -n base -c conda-forge {p}".format(p=pkgs),
         "conda config --set anaconda_upload no"
         ]
     ret = run_cmds(cmds)
