@@ -213,7 +213,7 @@ def rerender(dir):
     return ret
 
 def do_build(dir, py_version):
-    print("...do_build...")
+    print("...do_build..., py_version: {v}".format(v=py_version))
     ret = SUCCESS
     variant_files_dir = os.path.join(dir, ".ci_support")
     if py_version == "noarch":
