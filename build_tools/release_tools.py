@@ -211,6 +211,10 @@ def rerender(dir):
     ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
     if ret != SUCCESS:
         return ret
+
+    cmd = "ls -l {d}/.ci_support"
+    ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
+
     return ret
 
 def do_build(dir, py_version):
