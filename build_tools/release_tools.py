@@ -212,7 +212,7 @@ def rerender(dir):
     if ret != SUCCESS:
         return ret
 
-    cmd = "ls -l {d}/.ci_support".format(d=dir)
+    cmd = "ls -l {d}/.ci_support/*".format(d=dir)
     ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
 
     return ret
