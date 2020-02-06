@@ -209,11 +209,6 @@ def rerender(dir):
 
     cmd = "conda smithy rerender"
     ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
-    if ret != SUCCESS:
-        return ret
-
-    cmd = "ls -l {d}/.ci_support/*".format(d=dir)
-    ret = run_cmd(cmd, join_stderr, shell_cmd, verbose)
 
     return ret
 
