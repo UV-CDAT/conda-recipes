@@ -129,11 +129,11 @@ if args.do_rerender:
     ret, repo_dir = clone_repo(organization, repo_name, branch, workdir)
     if ret != SUCCESS:
         sys.exit(ret)
+    version = construct_pkg_ver(repo_dir)
 
 else:
     repo_dir = "{w}/{p}".format(w=workdir, p=repo_name)
 
-version = construct_pkg_ver(repo_dir)
 
 if is_conda_forge_pkg:
     if args.do_rerender:
