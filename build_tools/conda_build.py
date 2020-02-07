@@ -17,14 +17,15 @@ from release_tools import prepare_recipe_in_local_repo, rerender, do_build
 from release_tools import rerender_in_local_feedstock, build_in_local_feedstock
 from release_tools import rerender_in_local_repo, build_in_local_repo
 
-p = subprocess.Popen(["git", "rev-parse", "--short", "HEAD"], stdout=subprocess.PIPE)
-git_rev_parse = p.stdout.read().decode('utf-8')
-git_rev = "g{0}".format(git_rev_parse).strip()
-print("git_rev: {g}".format(g=git_rev))
-if "VERSION" in os.environ.keys():
-    last_stable=os.environ['VERSION']
-else:
-    last_stable = "8.2"
+##p = subprocess.Popen(["git", "rev-parse", "--short", "HEAD"], stdout=subprocess.PIPE)
+##git_rev_parse = p.stdout.read().decode('utf-8')
+##git_rev = "g{0}".format(git_rev_parse).strip()
+##print("git_rev: {g}".format(g=git_rev))
+
+##if "VERSION" in os.environ.keys():
+##    last_stable=os.environ['VERSION']
+##else:
+##    last_stable = "8.2"
 
 l = time.localtime()
 ##today = "%s.%.2i.%.2i.%.2i.%.2i.%.2i.%s" % (last_stable, l.tm_year, l.tm_mon, l.tm_mday, l.tm_hour, l.tm_min, git_rev)
@@ -113,7 +114,7 @@ def construct_pkg_ver(repo_dir):
         version = today2
 
     print("XXX XXX XXX version: {v}".format(v=version))
-
+    return version
 #
 # main
 #
@@ -129,7 +130,10 @@ if args.do_rerender:
     if ret != SUCCESS:
         sys.exit(ret)
 
-    version = construct_pkg_ver(repo_dir)
+else:
+    repo_dir = "{w}/{p}".format(w=workdir, p=repo_name)
+
+version = construct_pkg_ver(repo_dir)
 
 if is_conda_forge_pkg:
     if args.do_rerender:
