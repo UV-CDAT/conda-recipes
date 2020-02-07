@@ -130,7 +130,7 @@ if args.do_rerender:
     if ret != SUCCESS:
         sys.exit(ret)
     print("DEBUG DEBUG...calling construct_pkg_ver()")
-    version = construct_pkg_ver(repo_dir, arg.version, arg.last_stable)
+    version = construct_pkg_ver(repo_dir, args.version, args.last_stable)
     print("DEBUG DEBUG...construct_pkg_ver() returned version: {v}".format(v=version))
 
 else:
