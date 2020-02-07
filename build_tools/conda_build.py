@@ -27,7 +27,7 @@ else:
     last_stable = "8.2"
 
 l = time.localtime()
-today = "%s.%.2i.%.2i.%.2i.%.2i.%.2i.%s" % (last_stable, l.tm_year, l.tm_mon, l.tm_mday, l.tm_hour, l.tm_min, git_rev)
+##today = "%s.%.2i.%.2i.%.2i.%.2i.%.2i.%s" % (last_stable, l.tm_year, l.tm_mon, l.tm_mday, l.tm_hour, l.tm_min, git_rev)
 
 cwd = os.getcwd()
 
@@ -68,7 +68,7 @@ parser.add_argument("-o", "--github_organization_name",
 parser.add_argument("-r", "--repo_name",
                     help="repo name to build")
 parser.add_argument("-b", "--branch", default='master', help="branch to build")
-parser.add_argument("-v", "--version", default=today,
+parser.add_argument("-v", "--version",
                     help="version are we building for")
 parser.add_argument("-l", "--last_stable", default=last_stable,
                     help="last stable (released) version, specify this when building for nightly")
@@ -93,16 +93,6 @@ if args.repo_name:
 else:
     repo_name = pkg_name
 
-today2 = "%s.%.2i.%.2i.%.2i.%.2i.%.2i.%s" % (args.last_stable, l.tm_year, l.tm_mon, l.tm_mday, l.tm_hour, l.tm_min, git_rev)
-if args.version != today:
-    # we are building for a release of a non conda-forge package
-    version = args.version
-else:
-    # we are building for nightly
-    version = today2
-
-print("XXX XXX XXX version: {v}".format(v=version))
-
 # github organization of projects
 organization = args.github_organization_name
 
@@ -110,6 +100,19 @@ organization = args.github_organization_name
 join_stderr = True
 shell_cmd = False
 verbose = True
+version = None
+
+def construct_pkg_ver(repo_dir):
+    git_rev = get_git_rev(repo_dir)
+    today2 = "%s.%.2i.%.2i.%.2i.%.2i.%.2i.%s" % (args.last_stable, l.tm_year, l.tm_mon, l.tm_mday, l.tm_hour, l.tm_min, git_rev)
+    if args.version:
+        # we are building for a release of a non conda-forge package
+        version = args.version
+    else:
+        # we are building for nightly
+        version = today2
+
+    print("XXX XXX XXX version: {v}".format(v=version))
 
 #
 # main
@@ -125,6 +128,8 @@ if args.do_rerender:
     ret, repo_dir = clone_repo(organization, repo_name, branch, workdir)
     if ret != SUCCESS:
         sys.exit(ret)
+
+    version = construct_pkg_ver(repo_dir)
 
 if is_conda_forge_pkg:
     if args.do_rerender:
