@@ -113,7 +113,7 @@ def construct_pkg_ver(repo_dir):
         # we are building for nightly
         version = today2
 
-    print("XXX XXX XXX version: {v}".format(v=version))
+    print("XXX DEBUG XXX XXX XXX version: {v}".format(v=version))
     return version
 #
 # main
@@ -129,7 +129,9 @@ if args.do_rerender:
     ret, repo_dir = clone_repo(organization, repo_name, branch, workdir)
     if ret != SUCCESS:
         sys.exit(ret)
+    print("DEBUG DEBUG...calling construct_pkg_ver()")
     version = construct_pkg_ver(repo_dir)
+    print("DEBUG DEBUG...construct_pkg_ver() returned version: {v}".format(v=version))
 
 else:
     repo_dir = "{w}/{p}".format(w=workdir, p=repo_name)
