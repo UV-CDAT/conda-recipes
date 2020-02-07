@@ -15,7 +15,7 @@ from release_tools import prep_conda_env, check_if_conda_forge_pkg, clone_feedst
 from release_tools import clone_repo, prepare_recipe_in_local_feedstock_repo
 from release_tools import prepare_recipe_in_local_repo, rerender, do_build
 from release_tools import rerender_in_local_feedstock, build_in_local_feedstock
-from release_tools import rerender_in_local_repo, build_in_local_repo
+from release_tools import rerender_in_local_repo, build_in_local_repo, get_git_rev
 
 ##p = subprocess.Popen(["git", "rev-parse", "--short", "HEAD"], stdout=subprocess.PIPE)
 ##git_rev_parse = p.stdout.read().decode('utf-8')
