@@ -71,7 +71,7 @@ parser.add_argument("-r", "--repo_name",
 parser.add_argument("-b", "--branch", default='master', help="branch to build")
 parser.add_argument("-v", "--version",
                     help="version are we building for")
-parser.add_argument("-l", "--last_stable", default=last_stable,
+parser.add_argument("-l", "--last_stable",
                     help="last stable (released) version, specify this when building for nightly")
 parser.add_argument("-w", "--workdir", default=cwd, help="work full path directory")
 parser.add_argument("-B", "--build", default="0", help="build number, this should be 0 for nightly")
@@ -84,7 +84,6 @@ args = parser.parse_args(sys.argv[1:])
 
 pkg_name = args.package_name
 branch = args.branch
-last_stable = args.last_stable
 workdir = args.workdir
 build = args.build
 do_conda_clean = args.conda_clean
@@ -103,18 +102,19 @@ shell_cmd = False
 verbose = True
 version = None
 
-def construct_pkg_ver(repo_dir):
+def construct_pkg_ver(repo_dir, arg_version, arg_last_stable):
     git_rev = get_git_rev(repo_dir)
-    today2 = "%s.%.2i.%.2i.%.2i.%.2i.%.2i.%s" % (args.last_stable, l.tm_year, l.tm_mon, l.tm_mday, l.tm_hour, l.tm_min, git_rev)
-    if args.version:
+    if arg_version:
         # we are building for a release of a non conda-forge package
-        version = args.version
+        version = arg_version
     else:
         # we are building for nightly
+        today2 = "%s.%.2i.%.2i.%.2i.%.2i.%.2i.%s" % (arg_last_stable, l.tm_year, l.tm_mon, l.tm_mday, l.tm_hour, l.tm_min, git_rev)
         version = today2
 
     print("XXX DEBUG XXX XXX XXX version: {v}".format(v=version))
     return version
+
 #
 # main
 #
@@ -130,7 +130,7 @@ if args.do_rerender:
     if ret != SUCCESS:
         sys.exit(ret)
     print("DEBUG DEBUG...calling construct_pkg_ver()")
-    version = construct_pkg_ver(repo_dir)
+    version = construct_pkg_ver(repo_dir, arg.version, arg.last_stable)
     print("DEBUG DEBUG...construct_pkg_ver() returned version: {v}".format(v=version))
 
 else:
