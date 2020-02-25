@@ -16,6 +16,12 @@ shell_cmd = False
 verbose = True
 not_verbose = False
 
+def get_git_rev(repo_dir):
+    cmd = "git rev-parse --short HEAD"
+    ret_code, out = run_cmd_capture_output(cmd, join_stderr, shell_cmd, not_verbose, repo_dir)
+    git_rev = "g{r}".format(r=out[0])
+    return(git_rev)
+
 def get_latest_tag(repo_dir):
     cmd = "git ls-remote --tags origin"
 
@@ -209,12 +215,11 @@ def rerender(dir):
 
     cmd = "conda smithy rerender"
     ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
-    if ret != SUCCESS:
-        return ret
+
     return ret
 
 def do_build(dir, py_version):
-    print("...do_build...")
+    print("...do_build..., py_version: {v}".format(v=py_version))
     ret = SUCCESS
     variant_files_dir = os.path.join(dir, ".ci_support")
     if py_version == "noarch":

@@ -15,20 +15,10 @@ from release_tools import prep_conda_env, check_if_conda_forge_pkg, clone_feedst
 from release_tools import clone_repo, prepare_recipe_in_local_feedstock_repo
 from release_tools import prepare_recipe_in_local_repo, rerender, do_build
 from release_tools import rerender_in_local_feedstock, build_in_local_feedstock
-from release_tools import rerender_in_local_repo, build_in_local_repo
+from release_tools import rerender_in_local_repo, build_in_local_repo, get_git_rev
 
-p = subprocess.Popen(["git", "rev-parse", "--short", "HEAD"], stdout=subprocess.PIPE)
-git_rev_parse = p.stdout.read().decode('utf-8')
-git_rev = "g{0}".format(git_rev_parse).strip()
-print("git_rev: {g}".format(g=git_rev))
-if "VERSION" in os.environ.keys():
-    last_stable=os.environ['VERSION']
-else:
-    last_stable = "8.2"
 
 l = time.localtime()
-today = "%s.%.2i.%.2i.%.2i.%.2i.%.2i.%s" % (last_stable, l.tm_year, l.tm_mon, l.tm_mday, l.tm_hour, l.tm_min, git_rev)
-
 cwd = os.getcwd()
 
 #
@@ -68,9 +58,9 @@ parser.add_argument("-o", "--github_organization_name",
 parser.add_argument("-r", "--repo_name",
                     help="repo name to build")
 parser.add_argument("-b", "--branch", default='master', help="branch to build")
-parser.add_argument("-v", "--version", default=today,
+parser.add_argument("-v", "--version",
                     help="version are we building for")
-parser.add_argument("-l", "--last_stable", default=last_stable,
+parser.add_argument("-l", "--last_stable",
                     help="last stable (released) version, specify this when building for nightly")
 parser.add_argument("-w", "--workdir", default=cwd, help="work full path directory")
 parser.add_argument("-B", "--build", default="0", help="build number, this should be 0 for nightly")
@@ -83,7 +73,6 @@ args = parser.parse_args(sys.argv[1:])
 
 pkg_name = args.package_name
 branch = args.branch
-last_stable = args.last_stable
 workdir = args.workdir
 build = args.build
 do_conda_clean = args.conda_clean
@@ -93,16 +82,6 @@ if args.repo_name:
 else:
     repo_name = pkg_name
 
-today2 = "%s.%.2i.%.2i.%.2i.%.2i.%.2i.%s" % (args.last_stable, l.tm_year, l.tm_mon, l.tm_mday, l.tm_hour, l.tm_min, git_rev)
-if args.version != today:
-    # we are building for a release of a non conda-forge package
-    version = args.version
-else:
-    # we are building for nightly
-    version = today2
-
-print("XXX XXX XXX version: {v}".format(v=version))
-
 # github organization of projects
 organization = args.github_organization_name
 
@@ -110,6 +89,19 @@ organization = args.github_organization_name
 join_stderr = True
 shell_cmd = False
 verbose = True
+version = None
+
+def construct_pkg_ver(repo_dir, arg_version, arg_last_stable):
+    git_rev = get_git_rev(repo_dir)
+    if arg_version:
+        # we are building for a release of a non conda-forge package
+        version = arg_version
+    else:
+        # we are building for nightly
+        today2 = "%s.%.2i.%.2i.%.2i.%.2i.%.2i.%s" % (arg_last_stable, l.tm_year, l.tm_mon, l.tm_mday, l.tm_hour, l.tm_min, git_rev)
+        version = today2
+
+    return version
 
 #
 # main
@@ -125,6 +117,10 @@ if args.do_rerender:
     ret, repo_dir = clone_repo(organization, repo_name, branch, workdir)
     if ret != SUCCESS:
         sys.exit(ret)
+    version = construct_pkg_ver(repo_dir, args.version, args.last_stable)
+else:
+    repo_dir = "{w}/{p}".format(w=workdir, p=repo_name)
+
 
 if is_conda_forge_pkg:
     if args.do_rerender:
