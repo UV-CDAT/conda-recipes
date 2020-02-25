@@ -101,7 +101,6 @@ def construct_pkg_ver(repo_dir, arg_version, arg_last_stable):
         today2 = "%s.%.2i.%.2i.%.2i.%.2i.%.2i.%s" % (arg_last_stable, l.tm_year, l.tm_mon, l.tm_mday, l.tm_hour, l.tm_min, git_rev)
         version = today2
 
-    print("XXX version: {v}".format(v=version))
     return version
 
 #
@@ -118,10 +117,7 @@ if args.do_rerender:
     ret, repo_dir = clone_repo(organization, repo_name, branch, workdir)
     if ret != SUCCESS:
         sys.exit(ret)
-    print("DEBUG DEBUG...calling construct_pkg_ver()")
     version = construct_pkg_ver(repo_dir, args.version, args.last_stable)
-    print("DEBUG DEBUG...construct_pkg_ver() returned version: {v}".format(v=version))
-
 else:
     repo_dir = "{w}/{p}".format(w=workdir, p=repo_name)
 

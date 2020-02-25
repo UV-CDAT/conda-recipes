@@ -20,7 +20,6 @@ def get_git_rev(repo_dir):
     cmd = "git rev-parse --short HEAD"
     ret_code, out = run_cmd_capture_output(cmd, join_stderr, shell_cmd, not_verbose, repo_dir)
     git_rev = "g{r}".format(r=out[0])
-    print("XXX XXX DEBUG...get_git_rev: {g}".format(g=git_rev))
     return(git_rev)
 
 def get_latest_tag(repo_dir):
