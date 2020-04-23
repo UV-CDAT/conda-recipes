@@ -283,6 +283,22 @@ def prepare_recipe_in_local_repo(branch, build, version, repo_dir):
 
     return SUCCESS
 
+def copy_conda_config_yaml(pkg_name, repo_dir, workdir):
+    config = os.path.join(repo_dir, "recipe", "conda_build_config.yaml")
+    if os.path.isfile(config):
+        print("{c} exists in repo".format(c=config))
+        pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
+        feedstock_dir = os.path.join(workdir, pkg_feedstock)
+        cmd = "cp {c} {d}".format(c=config,
+                                  d=feedstock_dir)
+        #print("CMD: {c}".format(c=cmd))
+        #os.system(cmd)
+        ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, workdir)
+
+    else:
+        print("No {c} in repo".format(c=config))
+    return SUCCESS
+
 def rerender(dir):
     # pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
     # repo_dir = "{w}/{p}".format(w=workdir, p=pkg_feedstock)
