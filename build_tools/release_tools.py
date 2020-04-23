@@ -303,9 +303,9 @@ def rerender(dir):
     # pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
     # repo_dir = "{w}/{p}".format(w=workdir, p=pkg_feedstock)
 
+    print("Doing...'conda smithy rerender'...under {d}".format(d))
     cmd = "conda smithy rerender"
     ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
-
     if ret != SUCCESS:
         return ret
 
