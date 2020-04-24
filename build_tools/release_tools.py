@@ -323,6 +323,9 @@ def rerender(dir):
     print("Doing...'conda smithy rerender'...under {d}".format(d=dir))
     cmd = "conda smithy rerender"
     ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
+
+    cmd = "ls -l {d}".format(d=os.path.join(dir, ".ci_support"))
+    run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
     return ret
 
 def do_build(dir, py_version):
