@@ -299,6 +299,23 @@ def copy_conda_config_yaml(pkg_name, repo_dir, workdir):
         print("No {c} in repo".format(c=config))
     return SUCCESS
 
+def copy_file_from_repo_recipe(pkg_name, repo_dir, workdir, filename):
+
+    ret = SUCCESS
+    the_file = os.path.join(repo_dir, "recipe", filename)
+    if os.path.isfile(the_file):
+        print("{f} exists in repo".format(f=the_file))
+        pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
+        feedstock_recipe_dir = os.path.join(workdir, pkg_feedstock, "recipe")
+        cmd = "cp {f} {d}".format(f=the_file,
+                                  d=feedstock_recipe_dir)
+        #print("CMD: {c}".format(c=cmd))
+        #os.system(cmd)
+        ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, workdir)
+    else:
+        print("No {f} in repo".format(f=the_file))
+    return ret
+
 def rerender(dir):
     # pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
     # repo_dir = "{w}/{p}".format(w=workdir, p=pkg_feedstock)
@@ -306,12 +323,6 @@ def rerender(dir):
     print("Doing...'conda smithy rerender'...under {d}".format(d=dir))
     cmd = "conda smithy rerender"
     ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
-    if ret != SUCCESS:
-        return ret
-
-    cmd = "ls -l {d}/.ci_support".format(d=dir)
-    ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
-
     return ret
 
 def do_build(dir, py_version):
