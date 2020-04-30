@@ -197,68 +197,6 @@ def prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, br
 
     return SUCCESS
 
-def ORIG_prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, branch, pkg_version, build, repo_dir, workdir):
-    repo_url = "https://github.com/{o}/{r}.git\n\n".format(o=organization,r=repo_name)
-
-    pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
-    feedstock_dir = os.path.join(workdir, pkg_feedstock)
-    recipe_file = os.path.join(feedstock_dir, 'recipe', 'meta.yaml')
-
-    #
-    # if repo has a recipe/meta.yaml.in, this means the branch is updating
-    # the recipe, use this recipe to build.
-    # NOTE: when we build the package for conda-forge, we will need to
-    # merge this recipe to feedstock and delete the recipe from the repo.
-    #
-    repo_recipe = os.path.join(repo_dir, "recipe", "meta.yaml.in")
-    if os.path.isfile(repo_recipe):
-        print("\nNOTE: {r} exists, we will build using this recipe.\n".format(r=repo_recipe))
-        recipe_file_source = repo_recipe
-    else:
-        print("\nNOTE: building with feedstock recipe with modified package source\n")
-        recipe_file_source = os.path.join(feedstock_dir, 'recipe', 'meta.yaml.SRC')
-
-        cmd = "mv {src} {dest}".format(src=recipe_file, dest=recipe_file_source)
-        ret = run_cmd(cmd, join_stderr, shell_cmd, verbose)
-        if ret != SUCCESS:
-            return ret
-
-    orig_fh = open(recipe_file_source, "r")
-    output_fh = open(recipe_file, "w")
-
-    output_fh.write("package:\n")
-    output_fh.write("  name: {n}\n".format(n=pkg_name))
-    output_fh.write("  version: {v}\n\n".format(v=pkg_version))
-
-    output_fh.write("source:\n")
-    output_fh.write("  git_rev: {b}\n".format(b=branch))
-    output_fh.write("  git_url: {r}\n".format(r=repo_url))
-
-    start_copy = False
-    lines = orig_fh.readlines()
-    for l in lines:
-        match_obj = re.match("build:", l)
-        if match_obj:
-            start_copy = True
-        
-        match_build_number = re.match("\s+number:", l)
-        if match_build_number:
-            output_fh.write("  number: {b}\n".format(b=build))
-            continue
-        if start_copy:
-            output_fh.write(l)
-        else:
-            continue
-    output_fh.close()
-    orig_fh.close()
-
-    cmd = "cat {f}".format(f=recipe_file)
-    #ret = run_cmd(cmd, join_stderr, shell_cmd, verbose)
-    print("CMD: {c}".format(c=cmd))
-    os.system(cmd)
-
-    return SUCCESS
-
 def prepare_recipe_in_local_repo(branch, build, version, repo_dir):
     
     recipe_in_file = os.path.join(repo_dir, "recipe", "meta.yaml.in")
