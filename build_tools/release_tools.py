@@ -152,17 +152,21 @@ def prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, br
     orig_fh = open(recipe_file_source, "r")
     output_fh = open(recipe_file, "w")
 
-    output_fh.write("package:\n")
-    output_fh.write("  name: {n}\n".format(n=pkg_name))
-    output_fh.write("  version: {v}\n\n".format(v=pkg_version))
-
-    output_fh.write("source:\n")
-    output_fh.write("  git_rev: {b}\n".format(b=branch))
-    output_fh.write("  git_url: {r}\n".format(r=repo_url))
-
-    start_copy = False
+    start_copy = True
     lines = orig_fh.readlines()
     for l in lines:
+        match_obj = re.match("package:", l)
+        if match_obj:
+            start_copy = False
+            output_fh.write("package:\n")
+            output_fh.write("  name: {n}\n".format(n=pkg_name))
+            output_fh.write("  version: {v}\n\n".format(v=pkg_version))
+
+            output_fh.write("source:\n")
+            output_fh.write("  git_rev: {b}\n".format(b=branch))
+            output_fh.write("  git_url: {r}\n".format(r=repo_url))
+            continue
+
         match_obj = re.match("build:", l)
         if match_obj:
             start_copy = True
@@ -209,13 +213,49 @@ def prepare_recipe_in_local_repo(branch, build, version, repo_dir):
 
     return SUCCESS
 
+def copy_conda_config_yaml(pkg_name, repo_dir, workdir):
+    config = os.path.join(repo_dir, "recipe", "conda_build_config.yaml")
+    if os.path.isfile(config):
+        print("{c} exists in repo".format(c=config))
+        pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
+        feedstock_recipe_dir = os.path.join(workdir, pkg_feedstock, "recipe")
+        cmd = "cp {c} {d}".format(c=config,
+                                  d=feedstock_recipe_dir)
+        #print("CMD: {c}".format(c=cmd))
+        #os.system(cmd)
+        ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, workdir)
+
+    else:
+        print("No {c} in repo".format(c=config))
+    return SUCCESS
+
+def copy_file_from_repo_recipe(pkg_name, repo_dir, workdir, filename):
+
+    ret = SUCCESS
+    the_file = os.path.join(repo_dir, "recipe", filename)
+    if os.path.isfile(the_file):
+        print("{f} exists in repo".format(f=the_file))
+        pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
+        feedstock_recipe_dir = os.path.join(workdir, pkg_feedstock, "recipe")
+        cmd = "cp {f} {d}".format(f=the_file,
+                                  d=feedstock_recipe_dir)
+        #print("CMD: {c}".format(c=cmd))
+        #os.system(cmd)
+        ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, workdir)
+    else:
+        print("No {f} in repo".format(f=the_file))
+    return ret
+
 def rerender(dir):
     # pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
     # repo_dir = "{w}/{p}".format(w=workdir, p=pkg_feedstock)
 
+    print("Doing...'conda smithy rerender'...under {d}".format(d=dir))
     cmd = "conda smithy rerender"
     ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
 
+    cmd = "ls -l {d}".format(d=os.path.join(dir, ".ci_support"))
+    run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
     return ret
 
 def do_build(dir, py_version):

@@ -13,6 +13,7 @@ from Utils import run_cmd, run_cmds, run_cmd_capture_output
 from Utils import SUCCESS, FAILURE
 from release_tools import prep_conda_env, check_if_conda_forge_pkg, clone_feedstock
 from release_tools import clone_repo, prepare_recipe_in_local_feedstock_repo
+from release_tools import copy_file_from_repo_recipe
 from release_tools import prepare_recipe_in_local_repo, rerender, do_build
 from release_tools import rerender_in_local_feedstock, build_in_local_feedstock
 from release_tools import rerender_in_local_repo, build_in_local_repo, get_git_rev
@@ -129,6 +130,16 @@ if is_conda_forge_pkg:
             sys.exit(status)
 
         status = prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, branch, version, build, repo_dir, workdir)
+        if status != SUCCESS:
+            sys.exit(status)
+
+        status = copy_file_from_repo_recipe(pkg_name, repo_dir, workdir,
+                                            "conda_build_config.yaml")
+        if status != SUCCESS:
+            sys.exit(status)
+
+        status = copy_file_from_repo_recipe(pkg_name, repo_dir, workdir,
+                                            "build.sh")
         if status != SUCCESS:
             sys.exit(status)
 
