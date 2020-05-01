@@ -152,14 +152,6 @@ def prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, br
     orig_fh = open(recipe_file_source, "r")
     output_fh = open(recipe_file, "w")
 
-    #output_fh.write("package:\n")
-    #output_fh.write("  name: {n}\n".format(n=pkg_name))
-    #output_fh.write("  version: {v}\n\n".format(v=pkg_version))
-
-    #output_fh.write("source:\n")
-    #output_fh.write("  git_rev: {b}\n".format(b=branch))
-    #output_fh.write("  git_url: {r}\n".format(r=repo_url))
-
     start_copy = True
     lines = orig_fh.readlines()
     for l in lines:
