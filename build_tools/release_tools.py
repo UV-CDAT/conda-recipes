@@ -295,8 +295,8 @@ def do_build(conda_activate, conda_env, conda_rc, dir, py_version, **kwargs):
     variant_files_dir = os.path.join(dir, ".ci_support")
     if py_version == "noarch":
         variant_file = os.path.join(variant_files_dir, "linux_.yaml")
-        cmd = "source {} {}; conda build -m {} recipe/".format(conda_activate, conda_env, variant_file, env=env)
-        ret = run_cmd(["/bin/bash", "-c", cmd], join_stderr, shell_cmd, verbose, dir)
+        cmd = "source {} {}; conda build -m {} recipe/".format(conda_activate, conda_env, variant_file)
+        ret = run_cmd(["/bin/bash", "-c", cmd], join_stderr, shell_cmd, verbose, dir, env=env)
     else:
         if sys.platform == 'darwin':
             variant_files = glob.glob("{d}/.ci_support/osx*{v}*.yaml".format(d=dir, v=py_version))
@@ -304,8 +304,8 @@ def do_build(conda_activate, conda_env, conda_rc, dir, py_version, **kwargs):
             variant_files = glob.glob("{d}/.ci_support/linux*{v}*.yaml".format(d=dir, v=py_version))
 
         for variant_file in variant_files:
-            cmd = "source {} {}; conda build -m {} recipe/".format(conda_activate, conda_env, variant_file, env=env)
-            ret = run_cmd(["/bin/bash", "-c", cmd], join_stderr, shell_cmd, verbose, dir)
+            cmd = "source {} {}; conda build -m {} recipe/".format(conda_activate, conda_env, variant_file)
+            ret = run_cmd(["/bin/bash", "-c", cmd], join_stderr, shell_cmd, verbose, dir, env=env)
             if ret != SUCCESS:
                 print("FAIL: {c}".format(c=cmd))
                 break
