@@ -61,21 +61,41 @@ def get_asset_sha(org_name, repo_name, tag, workdir):
     print("sha: {v}".format(v=sha))
     return sha
 
-def prep_conda_env(to_do_conda_clean=False):
-    if to_do_conda_clean:
-        cmd = "conda clean --all"
-        ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, workdir)
+def prep_conda_env(conda_activate, conda_rc, conda_env, extra_channels, to_do_conda_clean=False, **kwargs):
+    # Remove existing condarc so environment is always fresh
+    if os.path.exists(conda_rc):
+        os.remove(conda_rc)
+
+    env = {"CONDARC": conda_rc}
+
+    base_config_cmd = "conda config --file {}".format(conda_rc)
+
+    cmds = [
+        "{} --set always_yes yes".format(base_config_cmd),
+        "{} --set channel_priority strict".format(base_config_cmd),
+        "{} --set anaconda_upload no".format(base_config_cmd),
+        "{} --add channels conda-forge --force".format(base_config_cmd),
+    ]
+
+    channels = ["{} --add channels {} --force".format(base_config_cmd, x) for x in extra_channels]
+
+    ret = run_cmds(cmds+channels)
+
+    ret = run_cmd("conda info", env=env)
+
+    if conda_env != "base":
+        cmd = ["/bin/bash", "-c", "source {} base; conda env remove -n {} -y".format(conda_activate, conda_env)]
+        ret = run_cmd(cmd, env=env)
 
     pkgs = "conda-build anaconda-client conda-smithy conda-verify conda-forge-pinning conda-forge-build-setup conda-forge-ci-setup"
-    cmds = [
-        #"conda update -y -q conda",
-        "conda config --set always_yes yes",
-        "conda config --add channels conda-forge --force",
-        "conda config --set channel_priority strict",
-        "conda install -n base -c conda-forge {p}".format(p=pkgs),
-        "conda config --set anaconda_upload no"
-        ]
-    ret = run_cmds(cmds)
+
+    cmd = ["/bin/bash", "-c", "source {} base; conda create -n {} -y {}".format(conda_activate, conda_env, pkgs)]
+    ret = run_cmd(cmd, env=env)
+
+    if to_do_conda_clean:
+        cmd = "source {} {}; conda clean --all".format(conda_activate, conda_env)
+        ret = run_cmd(["/bin/bash", "-c", cmd], join_stderr, shell_cmd, verbose, workdir, env=env)
+
     return ret
 
 def check_if_conda_forge_pkg(pkg_name):
@@ -170,7 +190,7 @@ def prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, br
         match_obj = re.match("build:", l)
         if match_obj:
             start_copy = True
-        
+
         match_build_number = re.match("\s+number:", l)
         if match_build_number:
             output_fh.write("  number: {b}\n".format(b=build))
@@ -190,7 +210,6 @@ def prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, br
     return SUCCESS
 
 def prepare_recipe_in_local_repo(branch, build, version, repo_dir):
-    
     recipe_in_file = os.path.join(repo_dir, "recipe", "meta.yaml.in")
     recipe_file = os.path.join(repo_dir, "recipe", "meta.yaml")
     if not os.path.isfile(recipe_in_file):
@@ -200,7 +219,7 @@ def prepare_recipe_in_local_repo(branch, build, version, repo_dir):
     with open(recipe_in_file, "r") as recipe_in_fh:
         s = recipe_in_fh.read()
     s = s.replace("@UVCDAT_BRANCH@", branch)
-    s = s.replace("@BUILD_NUMBER@", build)    
+    s = s.replace("@BUILD_NUMBER@", build)
     s = s.replace("@VERSION@", version)
 
     # write it out to recipe/meta.yaml file
@@ -246,77 +265,103 @@ def copy_file_from_repo_recipe(pkg_name, repo_dir, workdir, filename):
         print("No {f} in repo".format(f=the_file))
     return ret
 
-def rerender(dir):
+def rerender(conda_activate, conda_env, conda_rc, dir, **kwargs):
     # pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
     # repo_dir = "{w}/{p}".format(w=workdir, p=pkg_feedstock)
 
+    env = {"CONDARC": conda_rc}
+
     print("Doing...'conda smithy rerender'...under {d}".format(d=dir))
-    cmd = "conda smithy rerender"
-    ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
+    cmd = "source {} {}; conda info; conda smithy rerender".format(conda_activate, conda_env)
+    if kwargs["ignore_conda_missmatch"]:
+        cmd = "{!s} --no-check-uptodate".format(cmd)
+    ret = run_cmd(["/bin/bash", "-c", cmd], join_stderr, shell_cmd, verbose, dir, env=env)
+
+    if ret != SUCCESS:
+        sys.exit(ret)
 
     cmd = "ls -l {d}".format(d=os.path.join(dir, ".ci_support"))
     run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
     return ret
 
-def do_build(dir, py_version):
+def do_build(conda_activate, conda_env, conda_rc, dir, py_version, **kwargs):
     print("...do_build..., py_version: {v}".format(v=py_version))
     ret = SUCCESS
+    env = {"CONDARC": conda_rc}
     variant_files_dir = os.path.join(dir, ".ci_support")
     if py_version == "noarch":
         variant_file = os.path.join(variant_files_dir, "linux_.yaml")
-        cmd = "conda build -m {v} recipe/".format(v=variant_file)
-        ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
+        cmd = "source {} {}; conda build -m {} recipe/".format(conda_activate, conda_env, variant_file, env=env)
+        ret = run_cmd(["/bin/bash", "-c", cmd], join_stderr, shell_cmd, verbose, dir)
     else:
         if sys.platform == 'darwin':
             variant_files = glob.glob("{d}/.ci_support/osx*{v}*.yaml".format(d=dir, v=py_version))
         else:
             variant_files = glob.glob("{d}/.ci_support/linux*{v}*.yaml".format(d=dir, v=py_version))
- 
+
         for variant_file in variant_files:
-            cmd = "conda build -m {v} recipe/".format(v=variant_file)
-            ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
+            cmd = "source {} {}; conda build -m {} recipe/".format(conda_activate, conda_env, variant_file, env=env)
+            ret = run_cmd(["/bin/bash", "-c", cmd], join_stderr, shell_cmd, verbose, dir)
             if ret != SUCCESS:
                 print("FAIL: {c}".format(c=cmd))
                 break
 
     return ret
 
-def rerender_in_local_feedstock(pkg_name, workdir):
+def rerender_in_local_feedstock(pkg_name, workdir, **kwargs):
     pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
     repo_dir = os.path.join(workdir, pkg_feedstock)
 
-    ret = rerender(repo_dir)
+    ret = rerender(dir=repo_dir, **kwargs)
     if ret != SUCCESS:
         print("FAIL...rerender in {d}".format(d=repo_dir))
     return ret
 
-def build_in_local_feedstock(pkg_name, workdir, py_version):
+def build_in_local_feedstock(pkg_name, workdir, py_version, **kwargs):
     pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
     repo_dir = os.path.join(workdir, pkg_feedstock)
 
-    ret = do_build(repo_dir, py_version)
+    ret = do_build(dir=repo_dir, py_version=py_version, **kwargs)
     return ret
 
-def rerender_in_local_repo(repo_dir):
+def rerender_in_local_repo(repo_dir, **kwargs):
 
     conda_forge_yml = os.path.join(repo_dir, "conda-forge.yml")
     fh = open(conda_forge_yml, "w")
     fh.write("recipe_dir: recipe\n")
     fh.close()
 
-    ret = rerender(repo_dir)
+    ret = rerender(dir=repo_dir, **kwargs)
     return ret
 
     ret = update_variant_files(repo_dir)
     return ret
 
-def build_in_local_repo(repo_dir, py_version):
+def build_in_local_repo(repo_dir, py_version, **kwargs):
 
     print("...build_in_local_repo...")
-    ret = do_build(repo_dir, py_version)
+    ret = do_build(dir=repo_dir, py_version=py_version, **kwargs)
     return ret
 
+def find_conda_activate():
+    activate = None
 
+    if "CONDA_EXE" in os.environ:
+        m = re.match("(.*/conda/bin)/conda", os.environ["CONDA_EXE"])
+
+        if m is not None:
+            activate = os.path.join(m.group(1), "activate")
+    else:
+        glob_paths = (os.path.join(os.path.expanduser("~"), "*conda*/bin/activate"), "/opt/*conda*/bin/activate")
+        for x in glob_paths:
+            result = glob.glob(x)
+
+            if len(result) > 0:
+                activate = result[0]
+
+                break
+
+    return activate
 
 #latest_tag = get_latest_tag("/Users/muryanto1/work/release/cdms")
 #print("xxx latest_tag: {t}".format(t=latest_tag))

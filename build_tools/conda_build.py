@@ -11,6 +11,7 @@ import re
 
 from Utils import run_cmd, run_cmds, run_cmd_capture_output
 from Utils import SUCCESS, FAILURE
+from release_tools import find_conda_activate
 from release_tools import prep_conda_env, check_if_conda_forge_pkg, clone_feedstock
 from release_tools import clone_repo, prepare_recipe_in_local_feedstock_repo
 from release_tools import copy_file_from_repo_recipe
@@ -48,6 +49,8 @@ cwd = os.getcwd()
 # this script in CircleCI.
 #
 
+conda_rc = os.path.join(os.getcwd(), "condarc")
+
 parser = argparse.ArgumentParser(
     description='conda build upload',
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -69,8 +72,14 @@ parser.add_argument("-C", "--conda_clean", action='store_true', help="do 'conda 
 parser.add_argument("--do_rerender", action='store_true', help="do 'conda smithy rerender'")
 parser.add_argument("--do_build", action='store_true', help="do 'conda build -m <variant file> ...'")
 parser.add_argument("--build_version", default="3.7", help="specify python version to build 2.7, 3.7, 3.8")
+parser.add_argument("--conda_env", default="base", help="Conda environment to use, will be created if it doesn't exist")
+parser.add_argument("--extra_channels", nargs="+", type=str)
+parser.add_argument("--ignore_conda_missmatch", action="store_true", help="Will skip checking if packages are uptodate when rerendering recipe.")
+parser.add_argument("--conda_rc", default=conda_rc, help="File to use for condarc")
 
 args = parser.parse_args(sys.argv[1:])
+
+print(args)
 
 pkg_name = args.package_name
 branch = args.branch
@@ -110,13 +119,16 @@ def construct_pkg_ver(repo_dir, arg_version, arg_last_stable):
 # main
 #
 
+kwargs = vars(args)
+kwargs["conda_activate"] = find_conda_activate()
+
 is_conda_forge_pkg = check_if_conda_forge_pkg(pkg_name)
 
-if args.do_rerender:
-    status = prep_conda_env()
-    if status != SUCCESS:
-        sys.exit(status)
+status = prep_conda_env(**kwargs)
+if status != SUCCESS:
+    sys.exit(status)
 
+if args.do_rerender:
     ret, repo_dir = clone_repo(organization, repo_name, branch, workdir)
     if ret != SUCCESS:
         sys.exit(ret)
@@ -145,10 +157,10 @@ if is_conda_forge_pkg:
         if status != SUCCESS:
             sys.exit(status)
 
-        status = rerender_in_local_feedstock(pkg_name, workdir)
+        status = rerender_in_local_feedstock(pkg_name=pkg_name, workdir=workdir, **kwargs)
 
     if args.do_build:
-        status = build_in_local_feedstock(pkg_name, workdir, args.build_version)
+        status = build_in_local_feedstock(pkg_name=pkg_name, workdir=workdir, py_version=args.build_version, **kwargs)
 
 else:
     # non conda-forge package (does not have feedstock)
@@ -163,10 +175,10 @@ else:
         if status != SUCCESS:
             sys.exit(status)
 
-        status = rerender_in_local_repo(repo_dir)
+        status = rerender_in_local_repo(repo_dir=repo_dir, **kwargs)
 
     if args.do_build:
-        status = build_in_local_repo(repo_dir, args.build_version) 
+        status = build_in_local_repo(repo_dir=repo_dir, py_version=args.build_version, **kwargs)
 
 sys.exit(status)
 

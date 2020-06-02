@@ -7,7 +7,7 @@ import time
 SUCCESS = 0
 FAILURE = 1
 
-def run_command(cmd, join_stderr=True, shell_cmd=False, verbose=True, cwd=None):
+def run_command(cmd, join_stderr=True, shell_cmd=False, verbose=True, cwd=None, env=None):
     print("CMD: {c}".format(c=cmd))
     if isinstance(cmd, str):
         cmd = shlex.split(cmd)
@@ -22,8 +22,14 @@ def run_command(cmd, join_stderr=True, shell_cmd=False, verbose=True, cwd=None):
     else:
         current_wd = cwd
 
+    new_env = os.environ.copy()
+
+    if env is not None:
+        new_env.update(env)
+
     P = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=stderr_setting,
-        bufsize=0, cwd=current_wd, shell=shell_cmd)
+        bufsize=0, cwd=current_wd, shell=shell_cmd, env=new_env)
+
     out = []
     while P.poll() is None:
         read = P.stdout.readline().rstrip()
@@ -34,21 +40,21 @@ def run_command(cmd, join_stderr=True, shell_cmd=False, verbose=True, cwd=None):
 
     ret_code = P.returncode
     return(ret_code, out)
-                                                                                              
-def run_cmd(cmd, join_stderr=True, shell_cmd=False, verbose=True, cwd=None):
 
-    ret_code, output = run_command(cmd, join_stderr, shell_cmd, verbose, cwd)
+def run_cmd(cmd, join_stderr=True, shell_cmd=False, verbose=True, cwd=None, env=None):
+
+    ret_code, output = run_command(cmd, join_stderr, shell_cmd, verbose, cwd, env)
     return(ret_code)
 
-def run_cmds(cmds, join_stderr=True, shell_cmd=False, verbose=True, cwd=None):
+def run_cmds(cmds, join_stderr=True, shell_cmd=False, verbose=True, cwd=None, env=None):
     for cmd in cmds:
-        ret_code, output = run_command(cmd, join_stderr, shell_cmd, verbose, cwd)
+        ret_code, output = run_command(cmd, join_stderr, shell_cmd, verbose, cwd, env)
         if ret_code != SUCCESS:
             return ret_code
     return ret_code
 
-def run_cmd_capture_output(cmd, join_stderr=True, shell_cmd=False, verbose=True, cwd=None):
+def run_cmd_capture_output(cmd, join_stderr=True, shell_cmd=False, verbose=True, cwd=None, env=None):
 
-    ret_code, output = run_command(cmd, join_stderr, shell_cmd, verbose, cwd)
+    ret_code, output = run_command(cmd, join_stderr, shell_cmd, verbose, cwd, env)
     return(ret_code, output)
 
