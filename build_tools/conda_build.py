@@ -73,7 +73,7 @@ parser.add_argument("--do_rerender", action='store_true', help="do 'conda smithy
 parser.add_argument("--do_build", action='store_true', help="do 'conda build -m <variant file> ...'")
 parser.add_argument("--build_version", default="3.7", help="specify python version to build 2.7, 3.7, 3.8")
 parser.add_argument("--conda_env", default="base", help="Conda environment to use, will be created if it doesn't exist")
-parser.add_argument("--extra_channels", nargs="+", type=str)
+parser.add_argument("--extra_channels", nargs="+", type=str, default=[])
 parser.add_argument("--ignore_conda_missmatch", action="store_true", help="Will skip checking if packages are uptodate when rerendering recipe.")
 parser.add_argument("--conda_rc", default=conda_rc, help="File to use for condarc")
 
