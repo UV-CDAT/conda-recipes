@@ -86,6 +86,8 @@ else:
 # github organization of projects
 organization = args.github_organization_name
 
+status = FAILURE
+
 # for calling run_cmds
 join_stderr = True
 shell_cmd = False
