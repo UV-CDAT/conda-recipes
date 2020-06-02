@@ -84,13 +84,17 @@ def prep_conda_env(conda_activate, conda_rc, conda_env, extra_channels, to_do_co
     ret = run_cmd("conda info", env=env)
 
     if conda_env != "base":
-        cmd = ["/bin/bash", "-c", "source {} base; conda env remove -n {} -y".format(conda_activate, conda_env)]
-        ret = run_cmd(cmd, env=env)
+        cmd = "source {} base; conda env remove -n {} -y".format(conda_activate, conda_env)
+        ret = run_cmd(["/bin/bash", "-c", cmd], env=env)
 
     pkgs = "conda-build anaconda-client conda-smithy conda-verify conda-forge-pinning conda-forge-build-setup conda-forge-ci-setup"
 
-    cmd = ["/bin/bash", "-c", "source {} base; conda create -n {} -y {}".format(conda_activate, conda_env, pkgs)]
-    ret = run_cmd(cmd, env=env)
+    if conda_env == "base":
+        cmd = "source {} base; conda install -y {}".format(conda_activate, conda_env, pkgs)
+        ret = run_cmd(["/bin/bash", "-c", cmd], env=env)
+    else:
+        cmd = "source {} base; conda create -n {} -y {}".format(conda_activate, conda_env, pkgs)
+        ret = run_cmd(["/bin/bash", "-c", cmd], env=env)
 
     if to_do_conda_clean:
         cmd = "source {} {}; conda clean --all".format(conda_activate, conda_env)
