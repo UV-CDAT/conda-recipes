@@ -76,6 +76,7 @@ parser.add_argument("--conda_env", default="base", help="Conda environment to us
 parser.add_argument("--extra_channels", nargs="+", type=str, default=[])
 parser.add_argument("--ignore_conda_missmatch", action="store_true", help="Will skip checking if packages are uptodate when rerendering recipe.")
 parser.add_argument("--conda_rc", default=conda_rc, help="File to use for condarc")
+parser.add_argument("--conda_activate", help="Path to conda activate script.")
 
 args = parser.parse_args(sys.argv[1:])
 
@@ -120,7 +121,11 @@ def construct_pkg_ver(repo_dir, arg_version, arg_last_stable):
 #
 
 kwargs = vars(args)
-kwargs["conda_activate"] = find_conda_activate()
+kwargs["conda_activate"] = args.conda_activate or find_conda_activate()
+
+if kwargs["conda_activate"] is None:
+    print("Could not find conda activate script, try passing with --conda_activate argument")
+    sys.exit(FAILURE)
 
 is_conda_forge_pkg = check_if_conda_forge_pkg(pkg_name)
 
