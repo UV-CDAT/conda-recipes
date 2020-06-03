@@ -77,6 +77,7 @@ parser.add_argument("--extra_channels", nargs="+", type=str, default=[])
 parser.add_argument("--ignore_conda_missmatch", action="store_true", help="Will skip checking if packages are uptodate when rerendering recipe.")
 parser.add_argument("--conda_rc", default=conda_rc, help="File to use for condarc")
 parser.add_argument("--conda_activate", help="Path to conda activate script.")
+parser.add_argument("--copy_conda_package", help="Copies output conda package to directory")
 
 args = parser.parse_args(sys.argv[1:])
 
