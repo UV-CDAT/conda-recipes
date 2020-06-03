@@ -90,7 +90,7 @@ def prep_conda_env(conda_activate, conda_rc, conda_env, extra_channels, to_do_co
     pkgs = "conda-build anaconda-client conda-smithy conda-verify conda-forge-pinning conda-forge-build-setup conda-forge-ci-setup"
 
     if conda_env == "base":
-        cmd = "source {} base; conda install -y {}".format(conda_activate, conda_env, pkgs)
+        cmd = "source {} base; conda install -y {}".format(conda_activate, pkgs)
         ret = run_cmd(["/bin/bash", "-c", cmd], env=env)
     else:
         cmd = "source {} base; conda create -n {} -y {}".format(conda_activate, conda_env, pkgs)
