@@ -124,8 +124,8 @@ def construct_pkg_ver(repo_dir, arg_version, arg_last_stable):
 kwargs = vars(args)
 kwargs["conda_activate"] = args.conda_activate or find_conda_activate()
 
-if kwargs["conda_activate"] is None:
-    print("Could not find conda activate script, try passing with --conda_activate argument")
+if kwargs["conda_activate"] is None or not os.path.exists(kwargs["conda_activate"]):
+    print("Could not find conda activate script, try passing with --conda_activate argument and check file exists")
     sys.exit(FAILURE)
 
 is_conda_forge_pkg = check_if_conda_forge_pkg(pkg_name)

@@ -81,7 +81,8 @@ def prep_conda_env(conda_activate, conda_rc, conda_env, extra_channels, to_do_co
 
     ret = run_cmds(cmds+channels)
 
-    ret = run_cmd("conda info", env=env)
+    cmd = "source {} {}; conda info".format(conda_activate, conda_env)
+    ret = run_cmd(["/bin/bash", "-c", cmd], env=env)
 
     if conda_env != "base":
         cmd = "source {} base; conda env remove -n {} -y".format(conda_activate, conda_env)
