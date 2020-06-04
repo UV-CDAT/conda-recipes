@@ -11,7 +11,7 @@ import re
 
 from Utils import run_cmd, run_cmds, run_cmd_capture_output
 from Utils import SUCCESS, FAILURE
-from release_tools import find_conda_activate
+from release_tools import find_conda_activate, create_fake_feedstock
 from release_tools import prep_conda_env, check_if_conda_forge_pkg, clone_feedstock
 from release_tools import clone_repo, prepare_recipe_in_local_feedstock_repo
 from release_tools import copy_file_from_repo_recipe
@@ -140,7 +140,7 @@ if args.do_rerender:
         sys.exit(ret)
     version = construct_pkg_ver(repo_dir, args.version, args.last_stable)
 else:
-    repo_dir = "{w}/{p}".format(w=workdir, p=repo_name)
+    repo_dir = os.path.join(workdir, repo_name)
 
 
 if is_conda_forge_pkg:
@@ -163,28 +163,31 @@ if is_conda_forge_pkg:
         if status != SUCCESS:
             sys.exit(status)
 
-        status = rerender_in_local_feedstock(pkg_name=pkg_name, workdir=workdir, **kwargs)
+        status = rerender_in_local_feedstock(pkg_name=pkg_name, **kwargs)
 
     if args.do_build:
-        status = build_in_local_feedstock(pkg_name=pkg_name, workdir=workdir, py_version=args.build_version, **kwargs)
+        status = build_in_local_feedstock(pkg_name=pkg_name, py_version=args.build_version, **kwargs)
 
 else:
-    # non conda-forge package (does not have feedstock)
-    repo_dir = os.path.join(workdir, repo_name)
     print("Building non conda-forge package")
     print("...branch: {b}".format(b=branch))
     print("...build: {b}".format(b=build))
     print("...repo_dir: {d}".format(d=repo_dir))
 
     if args.do_rerender:
-        status = prepare_recipe_in_local_repo(branch, build, version, repo_dir)
+        status = prepare_recipe_in_local_repo(repo_dir=repo_dir, **kwargs)
+
         if status != SUCCESS:
             sys.exit(status)
 
-        status = rerender_in_local_repo(repo_dir=repo_dir, **kwargs)
+        feedstock_dir = create_fake_feedstock(repo_dir=repo_dir, **kwargs)
+
+        status = rerender_in_local_repo(repo_dir=feedstock_dir, **kwargs)
+    else:
+        feedstock_dir = os.path.join(workdir, "feedstock")
 
     if args.do_build:
-        status = build_in_local_repo(repo_dir=repo_dir, py_version=args.build_version, **kwargs)
+        status = build_in_local_repo(repo_dir=feedstock_dir, py_version=args.build_version, **kwargs)
 
 sys.exit(status)
 

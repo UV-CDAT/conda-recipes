@@ -214,7 +214,7 @@ def prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, br
 
     return SUCCESS
 
-def prepare_recipe_in_local_repo(branch, build, version, repo_dir):
+def prepare_recipe_in_local_repo(branch, build, version, repo_dir, **kwargs):
     recipe_in_file = os.path.join(repo_dir, "recipe", "meta.yaml.in")
     recipe_file = os.path.join(repo_dir, "recipe", "meta.yaml")
     if not os.path.isfile(recipe_in_file):
@@ -377,6 +377,20 @@ def find_conda_activate():
                 break
 
     return activate
+
+def create_fake_feedstock(conda_activate, conda_env, workdir, repo_dir, **kwargs):
+    feedstock_dir = os.path.join(workdir, "feedstock")
+
+    if not os.path.exists(feedstock_dir):
+        os.makedirs(feedstock_dir)
+
+    cmd = "source {} {}; conda smithy ci-skeleton {}".format(conda_activate, conda_env, feedstock_dir)
+    ret = run_cmd(["/bin/bash", "-c", cmd], join_stderr, shell_cmd, verbose, feedstock_dir)
+
+    cmd = "cp {}/recipe/* {}/recipe".format(repo_dir, feedstock_dir)
+    ret = run_cmd(["/bin/bash", "-c", cmd], join_stderr, shell_cmd, verbose, repo_dir)
+
+    return feedstock_dir
 
 #latest_tag = get_latest_tag("/Users/muryanto1/work/release/cdms")
 #print("xxx latest_tag: {t}".format(t=latest_tag))
