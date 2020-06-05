@@ -197,7 +197,7 @@ else:
 
         status = rerender_in_local_repo(repo_dir=feedstock_dir, **kwargs)
     else:
-        feedstock_dir = os.path.join(workdir, "{}-feedstock", pkg_name)
+        feedstock_dir = os.path.join(workdir, "{}-feedstock".format(pkg_name))
 
     if args.do_build:
         status = build_in_local_repo(repo_dir=feedstock_dir, py_version=args.build_version, **kwargs)
