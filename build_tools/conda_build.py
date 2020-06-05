@@ -78,7 +78,7 @@ parser.add_argument("--ignore_conda_missmatch", action="store_true", help="Will 
 parser.add_argument("--conda_rc", default=conda_rc, help="File to use for condarc")
 parser.add_argument("--conda_activate", help="Path to conda activate script.")
 parser.add_argument("--copy_conda_package", help="Copies output conda package to directory")
-parser.add_argument("--local_repo", help="Path to local project repository, must contain recipe/ directory")
+parser.add_argument("--local_repo", help="Path to local project repository")
 
 args = parser.parse_args(sys.argv[1:])
 
@@ -94,10 +94,6 @@ local_repo = args.local_repo
 if local_repo is not None and not os.path.exists(local_repo):
     print("Local repository {} does not exist".format(local_repo))
     sys.exit(FAILURE)
-
-    if not os.path.exists(os.path.join(local_repo, "recipe")):
-        print("Did not find recipe directory in local repository {}".format(local_repo))
-        sys.exit(FAILURE)
 
 if args.repo_name:
     repo_name = args.repo_name
