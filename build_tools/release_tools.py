@@ -148,7 +148,7 @@ def clone_repo(organization, repo_name, branch, workdir):
 
     return ret, repo_dir
 
-def prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, branch, pkg_version, build, repo_dir, workdir):
+def prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, branch, pkg_version, build, repo_dir, workdir, local_repo, **kwargs):
     repo_url = "https://github.com/{o}/{r}.git\n\n".format(o=organization,r=repo_name)
 
     pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
@@ -188,8 +188,13 @@ def prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, br
             output_fh.write("  version: {v}\n\n".format(v=pkg_version))
 
             output_fh.write("source:\n")
-            output_fh.write("  git_rev: {b}\n".format(b=branch))
-            output_fh.write("  git_url: {r}\n".format(r=repo_url))
+
+            if local_repo is None:
+                output_fh.write("  git_rev: {b}\n".format(b=branch))
+                output_fh.write("  git_url: {r}\n".format(r=repo_url))
+            else:
+                output_fh.write("  path: {}\n".format(local_repo))
+
             continue
 
         match_obj = re.match("build:", l)
@@ -214,7 +219,7 @@ def prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, br
 
     return SUCCESS
 
-def prepare_recipe_in_local_repo(branch, build, version, repo_dir, **kwargs):
+def prepare_recipe_in_local_repo(branch, build, version, repo_dir, local_repo, **kwargs):
     recipe_in_file = os.path.join(repo_dir, "recipe", "meta.yaml.in")
     recipe_file = os.path.join(repo_dir, "recipe", "meta.yaml")
     if not os.path.isfile(recipe_in_file):
@@ -226,6 +231,10 @@ def prepare_recipe_in_local_repo(branch, build, version, repo_dir, **kwargs):
     s = s.replace("@UVCDAT_BRANCH@", branch)
     s = s.replace("@BUILD_NUMBER@", build)
     s = s.replace("@VERSION@", version)
+
+    if local_repo is not None:
+        s = re.sub(".*git_.*", "", s)
+        s = re.sub("source:.*", "source:\n  path: {}\n".format(local_repo), s)
 
     # write it out to recipe/meta.yaml file
     with open(recipe_file, "w") as f:
@@ -378,8 +387,8 @@ def find_conda_activate():
 
     return activate
 
-def create_fake_feedstock(conda_activate, conda_env, workdir, repo_dir, **kwargs):
-    feedstock_dir = os.path.join(workdir, "feedstock")
+def create_fake_feedstock(conda_activate, conda_env, workdir, repo_dir, package_name, **kwargs):
+    feedstock_dir = os.path.join(workdir, "{}-feedstock".format(package_name))
 
     if not os.path.exists(feedstock_dir):
         os.makedirs(feedstock_dir)

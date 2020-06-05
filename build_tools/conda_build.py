@@ -78,6 +78,7 @@ parser.add_argument("--ignore_conda_missmatch", action="store_true", help="Will 
 parser.add_argument("--conda_rc", default=conda_rc, help="File to use for condarc")
 parser.add_argument("--conda_activate", help="Path to conda activate script.")
 parser.add_argument("--copy_conda_package", help="Copies output conda package to directory")
+parser.add_argument("--local_repo", help="Path to local project repository, must contain recipe/ directory")
 
 args = parser.parse_args(sys.argv[1:])
 
@@ -88,6 +89,15 @@ branch = args.branch
 workdir = args.workdir
 build = args.build
 do_conda_clean = args.conda_clean
+local_repo = args.local_repo
+
+if local_repo is not None and not os.path.exists(local_repo):
+    print("Local repository {} does not exist".format(local_repo))
+    sys.exit(FAILURE)
+
+    if not os.path.exists(os.path.join(local_repo, "recipe")):
+        print("Did not find recipe directory in local repository {}".format(local_repo))
+        sys.exit(FAILURE)
 
 if args.repo_name:
     repo_name = args.repo_name
@@ -135,13 +145,19 @@ if status != SUCCESS:
     sys.exit(status)
 
 if args.do_rerender:
-    ret, repo_dir = clone_repo(organization, repo_name, branch, workdir)
-    if ret != SUCCESS:
-        sys.exit(ret)
-    version = construct_pkg_ver(repo_dir, args.version, args.last_stable)
-else:
-    repo_dir = os.path.join(workdir, repo_name)
+    if local_repo is None:
+        ret, repo_dir = clone_repo(organization, repo_name, branch, workdir)
+        if ret != SUCCESS:
+            sys.exit(ret)
+    else:
+        repo_dir = local_repo
 
+    kwargs["version"] = version = construct_pkg_ver(repo_dir, args.version, args.last_stable)
+else:
+    if local_repo is None:
+        repo_dir = os.path.join(workdir, repo_name)
+    else:
+        repo_dir = local_repo
 
 if is_conda_forge_pkg:
     if args.do_rerender:
@@ -149,7 +165,7 @@ if is_conda_forge_pkg:
         if status != SUCCESS:
             sys.exit(status)
 
-        status = prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, branch, version, build, repo_dir, workdir)
+        status = prepare_recipe_in_local_feedstock_repo(pkg_name=pkg_name, organization=organization, repo_dir=repo_dir, pkg_version=version, **kwargs)
         if status != SUCCESS:
             sys.exit(status)
 
@@ -180,6 +196,7 @@ else:
         if status != SUCCESS:
             sys.exit(status)
 
+        # Create a fake feedstock in the workdir to run conda smithy in
         feedstock_dir = create_fake_feedstock(repo_dir=repo_dir, **kwargs)
 
         status = rerender_in_local_repo(repo_dir=feedstock_dir, **kwargs)
