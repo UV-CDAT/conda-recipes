@@ -166,7 +166,7 @@ if is_conda_forge_pkg:
         status = rerender_in_local_feedstock(**kwargs)
 
     if args.do_build:
-        status = build_in_local_feedstock(**kwargs
+        status = build_in_local_feedstock(**kwargs)
 
 else:
     print("Building non conda-forge package")
