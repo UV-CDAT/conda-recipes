@@ -1,13 +1,7 @@
-import glob
 import argparse
 import os
 import sys
-import subprocess
-import shlex
-import shutil
-import requests
 import time
-import re
 
 from Utils import run_cmd, run_cmds, run_cmd_capture_output
 from Utils import SUCCESS, FAILURE
@@ -57,7 +51,7 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument("-p", "--package_name",
                     help="Package name to build")
-parser.add_argument("-o", "--github_organization_name",
+parser.add_argument("-o", "--organization",
                     help="github organization name", default="CDAT")
 parser.add_argument("-r", "--repo_name",
                     help="repo name to build")
@@ -95,14 +89,6 @@ if local_repo is not None and not os.path.exists(local_repo):
     print("Local repository {} does not exist".format(local_repo))
     sys.exit(FAILURE)
 
-if args.repo_name:
-    repo_name = args.repo_name
-else:
-    repo_name = pkg_name
-
-# github organization of projects
-organization = args.github_organization_name
-
 status = FAILURE
 
 # for calling run_cmds
@@ -129,6 +115,10 @@ def construct_pkg_ver(repo_dir, arg_version, arg_last_stable):
 
 kwargs = vars(args)
 kwargs["conda_activate"] = args.conda_activate or find_conda_activate()
+if kwargs["repo_name"] is None:
+    kwargs["repo_name"] = pkg_name
+
+repo_name = kwargs["repo_name"]
 
 if kwargs["conda_activate"] is None or not os.path.exists(kwargs["conda_activate"]):
     print("Could not find conda activate script, try passing with --conda_activate argument and check file exists")
@@ -142,7 +132,7 @@ if status != SUCCESS:
 
 if args.do_rerender:
     if local_repo is None:
-        ret, repo_dir = clone_repo(organization, repo_name, branch, workdir)
+        ret, repo_dir = clone_repo(**kwargs)
         if ret != SUCCESS:
             sys.exit(ret)
     else:
@@ -157,28 +147,26 @@ else:
 
 if is_conda_forge_pkg:
     if args.do_rerender:
-        status = clone_feedstock(pkg_name, workdir)
+        status = clone_feedstock(**kwargs)
         if status != SUCCESS:
             sys.exit(status)
 
-        status = prepare_recipe_in_local_feedstock_repo(pkg_name=pkg_name, organization=organization, repo_dir=repo_dir, pkg_version=version, **kwargs)
+        status = prepare_recipe_in_local_feedstock_repo(pkg_version=version, repo_dir=repo_dir, **kwargs)
         if status != SUCCESS:
             sys.exit(status)
 
-        status = copy_file_from_repo_recipe(pkg_name, repo_dir, workdir,
-                                            "conda_build_config.yaml")
+        status = copy_file_from_repo_recipe(repo_dir=repo_dir, filename="conda_build_config.yaml", **kwargs)
         if status != SUCCESS:
             sys.exit(status)
 
-        status = copy_file_from_repo_recipe(pkg_name, repo_dir, workdir,
-                                            "build.sh")
+        status = copy_file_from_repo_recipe(repo_dir=repo_dir, filename="build.sh", **kwargs)
         if status != SUCCESS:
             sys.exit(status)
 
-        status = rerender_in_local_feedstock(pkg_name=pkg_name, **kwargs)
+        status = rerender_in_local_feedstock(**kwargs)
 
     if args.do_build:
-        status = build_in_local_feedstock(pkg_name=pkg_name, py_version=args.build_version, **kwargs)
+        status = build_in_local_feedstock(**kwargs
 
 else:
     print("Building non conda-forge package")
@@ -200,7 +188,7 @@ else:
         feedstock_dir = os.path.join(workdir, "{}-feedstock".format(pkg_name))
 
     if args.do_build:
-        status = build_in_local_repo(repo_dir=feedstock_dir, py_version=args.build_version, **kwargs)
+        status = build_in_local_repo(repo_dir=feedstock_dir, **kwargs)
 
 sys.exit(status)
 

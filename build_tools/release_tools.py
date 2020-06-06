@@ -118,8 +118,8 @@ def check_if_conda_forge_pkg(pkg_name):
         print("{p} is not a conda-forge package".format(p=pkg_name))
         return False
 
-def clone_feedstock(pkg_name, workdir):
-    pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
+def clone_feedstock(package_name, workdir):
+    pkg_feedstock = "{p}-feedstock".format(p=package_name)
     conda_forge_pkg_feedstock = "conda-forge/{p}".format(p=pkg_feedstock)
 
     feedstock_repo_dir = os.path.join(workdir, pkg_feedstock)
@@ -132,7 +132,7 @@ def clone_feedstock(pkg_name, workdir):
 
     return ret
 
-def clone_repo(organization, repo_name, branch, workdir):
+def clone_repo(organization, repo_name, branch, workdir, **kwargs):
     repo_dir = os.path.join(workdir, repo_name)
     if os.path.exists(repo_dir):
         shutil.rmtree(repo_dir)
@@ -148,10 +148,10 @@ def clone_repo(organization, repo_name, branch, workdir):
 
     return ret, repo_dir
 
-def prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, branch, pkg_version, build, repo_dir, workdir, local_repo, **kwargs):
+def prepare_recipe_in_local_feedstock_repo(package_name, organization, repo_name, branch, pkg_version, build, repo_dir, workdir, local_repo, **kwargs):
     repo_url = "https://github.com/{o}/{r}.git\n\n".format(o=organization,r=repo_name)
 
-    pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
+    pkg_feedstock = "{p}-feedstock".format(p=package_name)
     feedstock_dir = os.path.join(workdir, pkg_feedstock)
     recipe_file = os.path.join(feedstock_dir, 'recipe', 'meta.yaml')
 
@@ -184,7 +184,7 @@ def prepare_recipe_in_local_feedstock_repo(pkg_name, organization, repo_name, br
         if match_obj:
             start_copy = False
             output_fh.write("package:\n")
-            output_fh.write("  name: {n}\n".format(n=pkg_name))
+            output_fh.write("  name: {n}\n".format(n=package_name))
             output_fh.write("  version: {v}\n\n".format(v=pkg_version))
 
             output_fh.write("source:\n")
@@ -246,29 +246,13 @@ def prepare_recipe_in_local_repo(branch, build, version, repo_dir, local_repo, *
 
     return SUCCESS
 
-def copy_conda_config_yaml(pkg_name, repo_dir, workdir):
-    config = os.path.join(repo_dir, "recipe", "conda_build_config.yaml")
-    if os.path.isfile(config):
-        print("{c} exists in repo".format(c=config))
-        pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
-        feedstock_recipe_dir = os.path.join(workdir, pkg_feedstock, "recipe")
-        cmd = "cp {c} {d}".format(c=config,
-                                  d=feedstock_recipe_dir)
-        #print("CMD: {c}".format(c=cmd))
-        #os.system(cmd)
-        ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, workdir)
-
-    else:
-        print("No {c} in repo".format(c=config))
-    return SUCCESS
-
-def copy_file_from_repo_recipe(pkg_name, repo_dir, workdir, filename):
+def copy_file_from_repo_recipe(package_name, repo_dir, workdir, filename, **kwargs):
 
     ret = SUCCESS
     the_file = os.path.join(repo_dir, "recipe", filename)
     if os.path.isfile(the_file):
         print("{f} exists in repo".format(f=the_file))
-        pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
+        pkg_feedstock = "{p}-feedstock".format(p=package_name)
         feedstock_recipe_dir = os.path.join(workdir, pkg_feedstock, "recipe")
         cmd = "cp {f} {d}".format(f=the_file,
                                   d=feedstock_recipe_dir)
@@ -299,7 +283,8 @@ def rerender(conda_activate, conda_env, conda_rc, dir, **kwargs):
     return ret
 
 def do_build(conda_activate, conda_env, conda_rc, dir, py_version, copy_conda_package, **kwargs):
-    print("...do_build..., py_version: {v}".format(v=py_version))
+    print("...do_build..., py_version: {v}, dir: {d}".format(v=py_version,
+                                                             d=dir))
     ret = SUCCESS
     env = {"CONDARC": conda_rc}
     variant_files_dir = os.path.join(dir, ".ci_support")
@@ -332,8 +317,8 @@ def do_build(conda_activate, conda_env, conda_rc, dir, py_version, copy_conda_pa
 
     return ret
 
-def rerender_in_local_feedstock(pkg_name, workdir, **kwargs):
-    pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
+def rerender_in_local_feedstock(package_name, workdir, **kwargs):
+    pkg_feedstock = "{p}-feedstock".format(p=package_name)
     repo_dir = os.path.join(workdir, pkg_feedstock)
 
     ret = rerender(dir=repo_dir, **kwargs)
@@ -341,11 +326,11 @@ def rerender_in_local_feedstock(pkg_name, workdir, **kwargs):
         print("FAIL...rerender in {d}".format(d=repo_dir))
     return ret
 
-def build_in_local_feedstock(pkg_name, workdir, py_version, **kwargs):
-    pkg_feedstock = "{p}-feedstock".format(p=pkg_name)
+def build_in_local_feedstock(package_name, workdir, build_version, **kwargs):
+    pkg_feedstock = "{p}-feedstock".format(p=package_name)
     repo_dir = os.path.join(workdir, pkg_feedstock)
 
-    ret = do_build(dir=repo_dir, py_version=py_version, **kwargs)
+    ret = do_build(dir=repo_dir, py_version=build_version, **kwargs)
     return ret
 
 def rerender_in_local_repo(repo_dir, **kwargs):
@@ -361,10 +346,10 @@ def rerender_in_local_repo(repo_dir, **kwargs):
     ret = update_variant_files(repo_dir)
     return ret
 
-def build_in_local_repo(repo_dir, py_version, **kwargs):
+def build_in_local_repo(repo_dir, build_version, **kwargs):
 
     print("...build_in_local_repo...")
-    ret = do_build(dir=repo_dir, py_version=py_version, **kwargs)
+    ret = do_build(dir=repo_dir, py_version=build_version, **kwargs)
     return ret
 
 def find_conda_activate():
