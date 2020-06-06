@@ -118,7 +118,7 @@ def check_if_conda_forge_pkg(pkg_name):
         print("{p} is not a conda-forge package".format(p=pkg_name))
         return False
 
-def clone_feedstock(package_name, workdir):
+def clone_feedstock(package_name, workdir, **kwargs):
     pkg_feedstock = "{p}-feedstock".format(p=package_name)
     conda_forge_pkg_feedstock = "conda-forge/{p}".format(p=pkg_feedstock)
 
