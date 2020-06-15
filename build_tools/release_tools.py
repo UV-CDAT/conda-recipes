@@ -328,6 +328,7 @@ def rerender_in_local_feedstock(package_name, workdir, **kwargs):
     return ret
 
 def build_in_local_feedstock(package_name, workdir, build_version, **kwargs):
+    print("DEBUG DEBUG...build_in_local_feedstock(), copy_conda_package: {d}".format(d=kwargs[copy_conda_package]))
     pkg_feedstock = "{p}-feedstock".format(p=package_name)
     repo_dir = os.path.join(workdir, pkg_feedstock)
 
