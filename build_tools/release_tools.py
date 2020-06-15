@@ -309,10 +309,11 @@ def do_build(conda_activate, conda_env, conda_rc, dir, py_version, copy_conda_pa
             if ret != SUCCESS:
                 print("FAIL: {c}".format(c=cmd))
                 break
-
+            print("DEBUG DEBUG...here in do_build()...")
             if copy_conda_package is not None:
                 cmd = "source {} {}; output=$(conda build --output -m {} recipe/); cp $output {}".format(
                         conda_activate, conda_env, variant_file, copy_conda_package)
+                print("DEBUG DEBUG...cmd: {c}".format(c=cmd))
                 ret = run_cmd(["/bin/bash", "-c", cmd], join_stderr, shell_cmd, verbose, dir, env=env)
 
     return ret
