@@ -166,6 +166,7 @@ if is_conda_forge_pkg:
         status = rerender_in_local_feedstock(**kwargs)
 
     if args.do_build:
+        print("DEBUG DEBUG...copy_conda_package: {c}".format(c=kwargs["copy_conda_package"]))
         status = build_in_local_feedstock(**kwargs)
 
 else:
