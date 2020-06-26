@@ -77,7 +77,7 @@ def prep_conda_env(conda_activate, conda_rc, conda_env, extra_channels, to_do_co
         "{} --add channels conda-forge --force".format(base_config_cmd),
     ]
 
-    channels = ["{} --add channels {} --force".format(base_config_cmd, x) for x in extra_channels]
+    channels = ["{} --add channels {} --force".format(base_config_cmd, x) for x in reversed(extra_channels)]
 
     ret = run_cmds(cmds+channels)
 
