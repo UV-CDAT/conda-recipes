@@ -27,12 +27,12 @@ cd cdms
 
 Set the following environment variables.
 ```bash  
-  export **PKG_NAME**=<package_name>
-  export **REPO_NAME**=<repo_name>
-  export **LAST_STABLE**=<last_stable_version>
-  export **BRANCH**=<project_branch>
-  export **CONDA_ACTIVATE**=<conda_path>/bin/activate
-  export **CONDA_ENV**=<test_environment_name>
+  export PKG_NAME=<package_name>
+  export REPO_NAME=<repo_name>
+  export LAST_STABLE=<last_stable_version>
+  export BRANCH=<project_branch>
+  export CONDA_ACTIVATE=<conda_path>/bin/activate
+  export CONDA_ENV=<test_environment_name>
 ```
 
 For example:
