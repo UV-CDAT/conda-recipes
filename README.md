@@ -31,7 +31,7 @@ Set the following environment variables.
   export **LAST_STABLE**=<last_stable_version>
   export **BRANCH**=<project_branch>
   export **CONDA_ACTIVATE**=<conda_path>/bin/activate
-
+  export **CONDA_ENV**=<test_environment_name>
 For example:
 ```
 export PKG_NAME=cdms2
@@ -40,6 +40,7 @@ export LAST_STABLE=3.1.4
 export BRANCH=fix_flake8
 export CONDA_ACTIVATE=/home/username/miniconda3/bin/activate
 export PYTHON_VERSION=3.7
+export CONDA_ENV=test_cdms
 ```
 
 ## Rerender
@@ -59,10 +60,21 @@ $ python $BUILD_SCRIPT --workdir $WORKDIR --last_stable $LAST_STABLE \
 ## Build
 
 ```bash
+$ export EXTRA_CHANNELS=cdat/label/nightly
 $ python $BUILD_SCRIPT --workdir $WORKDIR --package_name $PKG_NAME \
   	 --repo_name $REPO_NAME --build_version $PYTHON_VERSION \
-	 --extra_channels "cdat/label/nightly conda-forge" \
+	 --extra_channels $EXTRA_CHANNELS \
 	 --conda_activate $CONDA_ACTIVATE --do_build
+```
+
+## Setup an environment with the built package
+```bash
+conda create -y -n $CONDA_ENV --use-local -c $EXTRA_CHANNEL $PKG_NAME 
+```
+
+For example, to create a test environment for running cdms test cases:
+```bash
+conda create -y -n $CONDA_ENV --use-local -c $EXTRA_CHANNELS $PKG_NAME testsrunner pytest
 ```
 
 
