@@ -1,15 +1,15 @@
 # conda-recipes
 
 This repository contains tools for:
-* CDAT developers to build their conda packages, create a test environment, and upload the built package to conda channel. The tools are under *build_tools*, the main script is *build_tools/conda_build.py*. *conda_build.py* can be called from project's *Makefile* which can then be called from project's *.circleci/config.yml*.
+- CDAT developers to build their conda packages, create a test environment, and upload the built package to conda channel. The tools are under *build_tools*, the main script is *build_tools/conda_build.py*. *conda_build.py* can be called from project's *Makefile* which can then be called from project's *.circleci/config.yml*.
 
-# Notes for cdat developers
+# Notes for CDAT developers
 
-In order to use *build_tools/conda_build.py*, create a conda environment, and activate the *base* environment. 
+In order to use *build_tools/conda_build.py*, create a conda environment and activate the *base* environment. 
 
 ## Clone conda-recipes repository.
 
-First clone conda-recipes repository to a work directory (referred as $WORKDIR in this documentation).
+Clone conda-recipes repository to a work directory (referred as $WORKDIR in this documentation).
 
 ```
 export WORKDIR=<some_work_directory>
@@ -22,16 +22,19 @@ Clone the CDAT project you want to build. For example, to clone *cdms* project:
 
 ```
 git clone https://github.com/CDAT/cdms
+cd cdms
 ```
 
 Set the following environment variables.
-  
+```bash  
   export **PKG_NAME**=<package_name>
   export **REPO_NAME**=<repo_name>
   export **LAST_STABLE**=<last_stable_version>
   export **BRANCH**=<project_branch>
   export **CONDA_ACTIVATE**=<conda_path>/bin/activate
   export **CONDA_ENV**=<test_environment_name>
+```
+
 For example:
 ```
 export PKG_NAME=cdms2
@@ -46,10 +49,7 @@ export CONDA_ENV=test_cdms
 ## Rerender
 
 
-First step in building a conda package is to do a rerendering which will pick up latest conda-forge update so that we get latest pinned dependencies.
-
-- Have *recipe/meta.yaml.in* in the project repo
-- 
+First step in building a conda package is to do a rerendering which will pick up latest conda-forge update so that we get latest pinned dependencies. You will need *recipe/meta.yaml.in* in the project repo
 
 ```bash
 $ python $BUILD_SCRIPT --workdir $WORKDIR --last_stable $LAST_STABLE \
