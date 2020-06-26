@@ -309,11 +309,9 @@ def do_build(conda_activate, conda_env, conda_rc, dir, py_version, copy_conda_pa
             if ret != SUCCESS:
                 print("FAIL: {c}".format(c=cmd))
                 break
-            print("DEBUG DEBUG...here in do_build()...")
             if copy_conda_package is not None:
                 cmd = "source {} {}; output=$(conda build --output -m {} recipe/); mkdir -p {}; cp $output {}".format(
                         conda_activate, conda_env, variant_file, copy_conda_package, copy_conda_package)
-                print("DEBUG DEBUG...cmd: {c}".format(c=cmd))
                 ret = run_cmd(["/bin/bash", "-c", cmd], join_stderr, shell_cmd, verbose, dir, env=env)
 
     return ret
@@ -328,7 +326,6 @@ def rerender_in_local_feedstock(package_name, workdir, **kwargs):
     return ret
 
 def build_in_local_feedstock(package_name, workdir, build_version, **kwargs):
-    print("DEBUG DEBUG...build_in_local_feedstock(), copy_conda_package: {d}".format(d=kwargs["copy_conda_package"]))
     pkg_feedstock = "{p}-feedstock".format(p=package_name)
     repo_dir = os.path.join(workdir, pkg_feedstock)
 
