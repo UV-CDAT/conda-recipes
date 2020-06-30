@@ -246,22 +246,40 @@ def prepare_recipe_in_local_repo(branch, build, version, repo_dir, local_repo, *
 
     return SUCCESS
 
-def copy_file_from_repo_recipe(package_name, repo_dir, workdir, filename, **kwargs):
+def copy_file_from_repo(package_name, repo_dir, workdir, filename, **kwargs):
 
+    print("...copy_file_from_repo(), filename: {f}".format(f=filename))
     ret = SUCCESS
-    the_file = os.path.join(repo_dir, "recipe", filename)
+    the_file = os.path.join(repo_dir, filename)
+    print("...the_file: {f}".format(f=the_file))
     if os.path.isfile(the_file):
         print("{f} exists in repo".format(f=the_file))
         pkg_feedstock = "{p}-feedstock".format(p=package_name)
-        feedstock_recipe_dir = os.path.join(workdir, pkg_feedstock, "recipe")
+        feedstock_dest_dir = os.path.dirname(os.path.join(workdir, pkg_feedstock, filename))
+        if not os.path.exists(feedstock_dest_dir):
+            print("...making {d}".format(d=feedstock_dest_dir))
+            os.makedirs(feedstock_dest_dir)
+
         cmd = "cp {f} {d}".format(f=the_file,
-                                  d=feedstock_recipe_dir)
+                                  d=feedstock_dest_dir)
         #print("CMD: {c}".format(c=cmd))
         #os.system(cmd)
         ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, workdir)
     else:
         print("No {f} in repo".format(f=the_file))
     return ret
+
+def copy_files_from_repo(package_name, repo_dir, workdir, filenames, **kwargs):
+
+    print("...copy_files_from_repo()...")
+    for f in filenames:
+        print("DEBUG...file: {f}".format(f=f))
+        ret = copy_file_from_repo(package_name, repo_dir, workdir, f, **kwargs)
+        if ret != SUCCESS:
+            print("FAIL in copying {f}".format(f=f))
+            return ret
+
+    return SUCCESS
 
 def rerender(conda_activate, conda_env, conda_rc, dir, **kwargs):
     # pkg_feedstock = "{p}-feedstock".format(p=pkg_name)

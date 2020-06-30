@@ -8,7 +8,7 @@ from Utils import SUCCESS, FAILURE
 from release_tools import find_conda_activate, create_fake_feedstock
 from release_tools import prep_conda_env, check_if_conda_forge_pkg, clone_feedstock
 from release_tools import clone_repo, prepare_recipe_in_local_feedstock_repo
-from release_tools import copy_file_from_repo_recipe
+from release_tools import copy_files_from_repo
 from release_tools import prepare_recipe_in_local_repo, rerender, do_build
 from release_tools import rerender_in_local_feedstock, build_in_local_feedstock
 from release_tools import rerender_in_local_repo, build_in_local_repo, get_git_rev
@@ -145,6 +145,11 @@ else:
     else:
         repo_dir = local_repo
 
+print("repo_dir: {d}".format(d=repo_dir))
+files = ["recipe/conda_build_config.yaml",
+         "recipe/build.sh",
+         ".ci_support/migrations/python38.yaml"]
+
 if is_conda_forge_pkg:
     if args.do_rerender:
         status = clone_feedstock(**kwargs)
@@ -155,11 +160,7 @@ if is_conda_forge_pkg:
         if status != SUCCESS:
             sys.exit(status)
 
-        status = copy_file_from_repo_recipe(repo_dir=repo_dir, filename="conda_build_config.yaml", **kwargs)
-        if status != SUCCESS:
-            sys.exit(status)
-
-        status = copy_file_from_repo_recipe(repo_dir=repo_dir, filename="build.sh", **kwargs)
+        status = copy_files_from_repo(repo_dir=repo_dir, filenames=files, **kwargs)
         if status != SUCCESS:
             sys.exit(status)
 
@@ -176,12 +177,15 @@ else:
 
     if args.do_rerender:
         status = prepare_recipe_in_local_repo(repo_dir=repo_dir, **kwargs)
-
         if status != SUCCESS:
             sys.exit(status)
 
         # Create a fake feedstock in the workdir to run conda smithy in
         feedstock_dir = create_fake_feedstock(repo_dir=repo_dir, **kwargs)
+
+        status = copy_files_from_repo(repo_dir=repo_dir, filenames=files, **kwargs)
+        if status != SUCCESS:
+            sys.exit(status)
 
         status = rerender_in_local_repo(repo_dir=feedstock_dir, **kwargs)
     else:
