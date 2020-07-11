@@ -127,7 +127,7 @@ def clone_feedstock(package_name, workdir, **kwargs):
         print("REMOVING existing {d}".format(d=feedstock_repo_dir))
         shutil.rmtree(feedstock_repo_dir)
 
-    cmd = "git clone git@github.com:{c}.git".format(c=conda_forge_pkg_feedstock)
+    cmd = "git clone https://github.com/{c}.git".format(c=conda_forge_pkg_feedstock)
     ret = run_cmd(cmd, join_stderr, shell_cmd, verbose, workdir)
 
     return ret
