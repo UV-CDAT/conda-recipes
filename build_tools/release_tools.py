@@ -162,6 +162,17 @@ def prepare_recipe_in_local_feedstock_repo(package_name, organization, repo_name
     # merge this recipe to feedstock and delete the recipe from the repo.
     #
     repo_recipe = os.path.join(repo_dir, "recipe", "meta.yaml.in")
+
+    #
+    # if branch name starts with 'for_release', we are building a non conda-forge
+    # package for a release, and the branch should have the recipe ready for
+    # rerender, so just copy over to the fake feedstock.
+    #
+    for_release = branch.startswith("for_release")
+    if for_release:
+        shutil.copyfile(repo_recipe, recipe_file)
+        return SUCCESS
+
     if os.path.isfile(repo_recipe):
         print("\nNOTE: {r} exists, we will build using this recipe.\n".format(r=repo_recipe))
         recipe_file_source = repo_recipe

@@ -148,7 +148,8 @@ else:
 print("repo_dir: {d}".format(d=repo_dir))
 files = ["recipe/conda_build_config.yaml",
          "recipe/build.sh",
-         ".ci_support/migrations/python38.yaml"]
+         ".ci_support/migrations/python38.yaml",
+         ".ci_support/migrations/hdf51106.yaml"]
 
 if is_conda_forge_pkg:
     if args.do_rerender:
