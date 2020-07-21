@@ -311,16 +311,15 @@ def rerender(conda_activate, conda_env, conda_rc, dir, **kwargs):
     run_cmd(cmd, join_stderr, shell_cmd, verbose, dir)
     return ret
 
-def do_build(conda_activate, conda_env, conda_rc, dir, py_version, copy_conda_package, **kwargs):
+def do_build(conda_activate, conda_env, conda_rc, dir, py_version, copy_conda_package, extra_channels, **kwargs):
     print("...do_build..., py_version: {v}, dir: {d}".format(v=py_version,
                                                              d=dir))
     ret = SUCCESS
-    channels = "-c conda-forge/label/cdat_dev -c conda-forge -c cdat/label/cdat_dev -c cdat/label/nightly"
     env = {"CONDARC": conda_rc}
     variant_files_dir = os.path.join(dir, ".ci_support")
     if py_version == "noarch":
         variant_file = os.path.join(variant_files_dir, "linux_.yaml")
-        cmd = "source {} {}; conda build -m {} recipe/".format(conda_activate, conda_env, variant_file)
+        cmd = "source {} {}; conda build {} -m {} recipe/".format(conda_activate, conda_env, extra_channels, variant_file)
         ret = run_cmd(["/bin/bash", "-c", cmd], join_stderr, shell_cmd, verbose, dir, env=env)
 
         if copy_conda_package is not None:
@@ -334,7 +333,7 @@ def do_build(conda_activate, conda_env, conda_rc, dir, py_version, copy_conda_pa
             variant_files = glob.glob("{d}/.ci_support/linux*{v}*.yaml".format(d=dir, v=py_version))
 
         for variant_file in variant_files:
-            cmd = "source {} {}; conda build {} -m {} recipe/".format(conda_activate, conda_env, channels, variant_file)
+            cmd = "source {} {}; conda build {} -m {} recipe/".format(conda_activate, conda_env, extra_channels, variant_file)
             ret = run_cmd(["/bin/bash", "-c", cmd], join_stderr, shell_cmd, verbose, dir, env=env)
             if ret != SUCCESS:
                 print("FAIL: {c}".format(c=cmd))
