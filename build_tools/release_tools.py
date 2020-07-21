@@ -322,7 +322,9 @@ def do_build(conda_activate, conda_env, conda_rc, dir, py_version, copy_conda_pa
     #
     channels = ""
     for c in extra_channels:
-        channels.append("-c {c} ".format(c=c))
+        channels = "{channels} -c {new_channel}".format(channels=channels,
+                                                        new_channel=c)
+    print("channels: {c}".format(c=channels))
 
     variant_files_dir = os.path.join(dir, ".ci_support")
     if py_version == "noarch":
