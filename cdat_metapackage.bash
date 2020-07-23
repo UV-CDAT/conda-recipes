@@ -7,7 +7,6 @@ export CDMS_VERSION=3.1.5.rc3
 export GENUTIL_VERSION=8.2.1.rc2
 export CDUTIL_VERSION=8.2.1.rc1
 export VTK_CDAT_VERSION=8.2.0.8.2.1.rc1
-#export LIBNETCDF_VERSION=
 export BUILD=0
 export OP="=="
 export CHANNELS="-c conda-forge/label/cdat_dev -c conda-forge -c cdat/label/cdat_dev"
