@@ -1,7 +1,7 @@
 #!/bin/bash -x
 export VERSION=8.2.1.rc1
 export CDAT_VERSION=8.2.1.rc1
-export CDAT_INFO_VERSION=8.2.1.rc1
+export CDAT_INFO_VERSION=8.2.1.rc2
 export CDTIME_VERSION=3.1.4.rc1
 export CDMS_VERSION=3.1.5.rc3
 export GENUTIL_VERSION=8.2.1.rc2
