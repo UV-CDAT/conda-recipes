@@ -328,7 +328,7 @@ def do_build(conda_activate, conda_env, conda_rc, dir, py_version, copy_conda_pa
 
     variant_files_dir = os.path.join(dir, ".ci_support")
     if py_version == "noarch":
-        variant_file = os.path.join(variant_files_dir, "linux_.yaml")
+        variant_file = os.path.join(variant_files_dir, "linux_64_.yaml")
         cmd = "source {} {}; conda build {} -m {} recipe/".format(conda_activate, conda_env, channels, variant_file)
         ret = run_cmd(["/bin/bash", "-c", cmd], join_stderr, shell_cmd, verbose, dir, env=env)
 
