@@ -1,15 +1,15 @@
 #!/bin/bash -x
-export VERSION=8.2.1.rc1
-export CDAT_VERSION=8.2.1.rc2
-export CDAT_INFO_VERSION=8.2.1.rc2
-export CDTIME_VERSION=3.1.4.rc1
-export CDMS_VERSION=3.1.5.rc3
-export GENUTIL_VERSION=8.2.1.rc2
-export CDUTIL_VERSION=8.2.1.rc1
-export VTK_CDAT_VERSION=8.2.0.8.2.1.rc1
+export VERSION=8.2.1
+export CDAT_VERSION=8.2.1
+export CDAT_INFO_VERSION=8.2.1
+export CDTIME_VERSION=3.1.4
+export CDMS_VERSION=3.1.5
+export GENUTIL_VERSION=8.2.1
+export CDUTIL_VERSION=8.2.1
+export VTK_CDAT_VERSION=8.2.0.8.2.1
 export BUILD=0
 export OP="=="
-export CHANNELS="-c conda-forge/label/cdat_dev -c conda-forge -c cdat/label/cdat_dev"
+export CHANNELS="-c conda-forge -c cdat/label/v8.2.1"
 conda metapackage cdat ${CDAT_VERSION} \
     ${CHANNELS} \
     --build-number ${BUILD} --dependencies \
